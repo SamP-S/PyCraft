@@ -13,7 +13,7 @@ class timer:
         self.start = time.time()
 
     def getTime(self, isMilliseconds = True):
-        t = time.time() - start
+        t = time.time() - self.start
         if isMilliseconds:
             return t * 1000
         else:

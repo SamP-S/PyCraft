@@ -15,6 +15,7 @@ WINDOW_HEIGHT = 360
 
 # input management
 keyboard = input.keyboard()
+mouse = input.mouse()
 
 # definitions
 def glWindow():
@@ -22,18 +23,25 @@ def glWindow():
     window = pygame.display
     pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), DOUBLEBUF|OPENGL)
     pygame.display.set_caption("Minecraft")
+    pygame.mouse.set_visible(False)
+    pygame.event.set_grab(True)
+
     gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
     glTranslatef(0, 0, -10)
-    glScalef(0.5, 0.5, 0.5)
 
 
 def handleEvents():
+    pygame.mouse.set_pos = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
-        else:
-            keyboard.processEvent(event)
+        elif event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
+            keyboard.processKey(event)
+        elif event.type == pygame.MOUSEMOTION:
+            mouse.processMotion(event)
+        elif event.type == pygame.MOUSEBUTTONUP or event.type == pygame.MOUSEBUTTONDOWN:
+            mouse.processButton(event)
 
 
 def main():
@@ -43,15 +51,15 @@ def main():
     player_cam = camera.camera()
     while True:
         handleEvents()
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        #quadCube()
+        player_cam.process(keyboard, mouse)
 
-        player_cam.pos.y += 0.01
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_CULL_FACE)
+
         glPushMatrix()
         player_cam.set()
-
         chunk.render()
-
         glPopMatrix()
         pygame.display.flip()
         pygame.time.wait(10)
