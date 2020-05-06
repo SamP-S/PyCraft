@@ -8,6 +8,7 @@ from OpenGL.GLU import *
 import terrain
 import input
 import camera
+import timer
 
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 360
@@ -25,9 +26,6 @@ def glWindow():
     pygame.display.set_caption("Minecraft")
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
-
-
-
 
 
 def handleEvents():
@@ -52,6 +50,7 @@ def main():
 
     gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
 
+    frametimer = timer.timer()
     while True:
         handleEvents()
         player_cam.process(keyboard, mouse)
@@ -65,7 +64,8 @@ def main():
         chunk.render()
         glPopMatrix()
         pygame.display.flip()
-        pygame.time.wait(10)
+        print(frametimer.getTime())
+        frametimer.reset()
 
 
 if __name__ == "__main__":
