@@ -5,8 +5,8 @@ from random import random
 
 print("terrain.py")
 
-CONST_WIDTH = 2
-CONST_DEPTH = 2
+CONST_WIDTH = 16
+CONST_DEPTH = 16
 CONST_HEIGHT = 1
 
 cubeVertices = ((0, 0, 0), (0, 0, 1), (1, 0, 1), (1, 0, 0), (0, 1, 0), (0, 1, 1), (1, 1, 1), (1, 1, 0))
@@ -42,15 +42,15 @@ class chunk:
 
     def render(self):
         for k in range(CONST_DEPTH):
-            glTranslatef(0, 0, 1)
             for j in range(CONST_HEIGHT):
-                glTranslatef(0, 1, 0)
                 for i in range(CONST_WIDTH):
-                    glTranslatef(1, 0, 0)
                     glColor3f(self.data[k][j][i], self.data[k][j][i], self.data[k][j][i])
                     quadCube()
+                    glTranslatef(1, 0, 0)
                 glTranslatef(-CONST_WIDTH, 0, 0)
+                glTranslatef(0, 1, 0)
             glTranslatef(0, -CONST_HEIGHT, 0)
+            glTranslatef(0, 0, 1)
         glTranslatef(0, 0, -CONST_DEPTH)
 
 def main():

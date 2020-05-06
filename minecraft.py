@@ -26,8 +26,8 @@ def glWindow():
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
 
-    gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
-    glTranslatef(0, 0, -10)
+
+
 
 
 def handleEvents():
@@ -49,6 +49,9 @@ def main():
     glWindow()
     chunk = terrain.chunk()
     player_cam = camera.camera()
+
+    gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
+
     while True:
         handleEvents()
         player_cam.process(keyboard, mouse)
