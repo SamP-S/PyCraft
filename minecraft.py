@@ -56,7 +56,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         #quadCube()
 
-        player_cam.pos.y += 0.001
+        player_cam.pos.y += 0.01
         glPushMatrix()
         player_cam.set()
 
