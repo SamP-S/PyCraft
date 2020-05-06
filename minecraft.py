@@ -64,8 +64,10 @@ def main():
         chunk.render()
         glPopMatrix()
         pygame.display.flip()
-        print(frametimer.getTime())
-        frametimer.reset()
+
+        # fps counter
+        # print(1 / frametimer.getTime())
+        # frametimer.reset()
 
 
 if __name__ == "__main__":
