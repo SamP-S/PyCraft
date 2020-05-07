@@ -1,10 +1,10 @@
+import numpy as np
 import pygame
 from pygame.locals import *
 
 from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
 from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVertexArray
-
 from OpenGL.GLU import *
 
 from random import random
@@ -90,7 +90,7 @@ def main():
         player_cam.setPerspective(shader)
         player_cam.set(shader)
 
-        chunk.render()
+        chunk.render(shader)
 
         pygame.display.flip()
 

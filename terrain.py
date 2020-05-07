@@ -151,17 +151,18 @@ class chunk:
                 for i in range(CONST_WIDTH):
                     print(self.data[k][j][i])
 
-    def render(self):
+    def render(self, shader):
         # assign uniforms
         # bind vertex_array_object
         # bind vbo
         # draw elements
+
+        model = maths3d.m4_translatev(self.pos)
+        uni = glGetUniformLocation(shader.id, "model")
+        glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
-        glPushMatrix()
-        glTranslatef(self.pos.x, self.pos.y, self.pos.z)
         glDrawArrays(GL_QUADS, 0, self.vertices.size)
-        glPopMatrix()
 
 
 def main():

@@ -31,15 +31,17 @@ class camera:
         self.up = maths3d.vec3(0, 1, 0)
 
     def set(self, shader):
-        self.view = maths3d.m4_lookAt(self.pos, v3_add(self.pos, self.forward), self.up)
-        glUniformMatrix4fv(glGetUniformLocation(shader, b"view"), 1, GL_TRUE, self.view)
+        self.view = maths3d.m4_lookAt(self.pos, maths3d.v3_add(self.pos, self.forward), self.up)
+        uni = glGetUniformLocation(shader.id, "view")
+        glUniformMatrix4fv(uni, 1, GL_TRUE, self.view.m)
         #gluLookAt(0, 0, 0, self.forward.x, self.forward.y, self.forward.z, self.up.x, self.up.y, self.up.z)
         #glTranslatef(-self.pos.x, -self.pos.y, -self.pos.z) # negative for inverse
 
 
     def setPerspective(self, shader):
         self.proj = maths3d.m4_projection(45, 0.1, 1000)
-        glUniformMatrix4fv(glGetUniformLocation(shader, b"proj"), 1, GL_TRUE, self.proj)
+        uni = glGetUniformLocation(shader.id, "proj")
+        glUniformMatrix4fv(uni, 1, GL_TRUE, self.proj.m)
         #glLoadIdentity()
         #gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000)
 

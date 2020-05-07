@@ -1,5 +1,22 @@
 import math
+import numpy as np
 
+# class definitions (data structures)
+class vec3:
+
+    def __init__(self, x = 0, y = 0, z = 0):
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
+
+class mat4:
+
+    def __init__(self):
+        self.array = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+        self.m = np.asmatrix(self.array, dtype='f')
+
+
+# vec3 functions
 def v3_add(a, b):
     return vec3(a.x + b.x, a.y + b.y, a.z + b.z)
 
@@ -28,24 +45,20 @@ def v3_cross(a, b):
     z = m2_determinant(a.x, a.y, b.x, b.y)
     return vec3(x, y, z)
 
+
 # determinant
 #   a b
 #   c d
 def m2_determinant(a, b, c, d):
     return a * d - b * c
 
-class vec3:
 
-    def __init__(self, x = 0, y = 0, z = 0):
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
-
+# mat4 functions
 def m4_translate(x, y, z):
     m = mat4()
-    m[3,0] = x
-    m[3,1] = y
-    m[3,2] = z
+    m.m[3,0] = x
+    m.m[3,1] = y
+    m.m[3,2] = z
     return m
 
 def m4_translatev(v):
@@ -53,9 +66,9 @@ def m4_translatev(v):
 
 def m4_scale(x, y, z):
     m = mat4()
-    m[0,0] = x
-    m[1,1] = y
-    m[2,2] = z
+    m.m[0,0] = x
+    m.m[1,1] = y
+    m.m[2,2] = z
     return m
 
 def m4_scalev(v):
@@ -90,9 +103,3 @@ def m4_projection(angle, near, far):
     m.m[2,3] = -1
     m.m[3,3] = 0
     return m
-
-class mat4:
-
-    def __init__(self):
-        self.array = np.array([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])
-        self.m = np.asmatrix(self.array)
