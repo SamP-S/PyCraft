@@ -70,13 +70,30 @@ class chunk:
         # generate VBO
         self.vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glBufferData(GL_ARRAY_BUFFER, self.vertices.itemsize * len(self.vertices) , self.vertices, GL_STATIC_DRAW)
-        print(self.vertices)
+        glBufferData(GL_ARRAY_BUFFER, self.vertices, GL_STATIC_DRAW)
         #shaders.glErrorCheck()
 
         # bind attributes
         glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+
+    def render(self, shader):
+        # assign uniforms
+        # bind vertex_array_object
+        # bind vbo
+        # draw elements
+
+        model = maths3d.m4_translatev(self.pos)
+        uni = glGetUniformLocation(shader.id, "model")
+        glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
+        #print("model")
+        #shaders.glErrorCheck()
+        #print(self.vertices.size)
+
+        glBindVertexArray(self.vao)
+        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+        glVertexPointer(3, GL_FLOAT, 0, None)
+        glDrawArrays(GL_QUADS, 0, self.vertices.size)
 
 
     def generate(self):
@@ -97,8 +114,9 @@ class chunk:
         quadIndicies = squareQuads[face]
         for index in quadIndicies:
             vertex = cubeVertices[index]
-            arr = np.array([x + vertex[0], y + vertex[1], z + vertex[2]], dtype='f')
-            self.vertices = np.append(self.vertices, arr)
+            self.vertices = np.append(self.vertices, x + vertex[0])
+            self.vertices = np.append(self.vertices, y + vertex[1])
+            self.vertices = np.append(self.vertices, z + vertex[2])
 
 
     def generateMesh(self):
@@ -145,7 +163,6 @@ class chunk:
                         elif self.data[k + 1][j][i] == 0:
                             self.addMesh(FACE.FRONT, i, j, k)
 
-
     def print(self):
         for k in range(CONST_DEPTH):
             print ()
@@ -153,25 +170,6 @@ class chunk:
                 print()
                 for i in range(CONST_WIDTH):
                     print(self.data[k][j][i])
-
-    def render(self, shader):
-        # assign uniforms
-        # bind vertex_array_object
-        # bind vbo
-        # draw elements
-
-        model = maths3d.m4_translatev(self.pos)
-        uni = glGetUniformLocation(shader.id, "model")
-        glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
-        print("model")
-        shaders.glErrorCheck()
-
-        print(self.vertices.size)
-
-        glBindVertexArray(self.vao)
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glVertexPointer(3, GL_FLOAT, 0, None)
-        glDrawArrays(GL_QUADS, 0, self.vertices.size)
 
 
 def main():
