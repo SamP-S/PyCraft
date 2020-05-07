@@ -86,11 +86,31 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         shader.use()
-
-        player_cam.setPerspective(shader)
         player_cam.set(shader)
-
         chunk.render(shader)
+
+        # attribute validation
+        bufSize = 256
+        length = (GLint * 1)()
+        size = (GLint * 1)()
+        type = (GLuint * 1)()
+        name = ""
+
+
+        countAttrib = glGetProgramiv(shader.id, GL_ACTIVE_ATTRIBUTES)
+        #print("Active Attributes: ", countAttrib)
+        for i in range(countAttrib):
+            glGetActiveAttrib(shader.id, GLuint(i), bufSize, length, size, type, name)
+            print("Attribute #", i, " Type: ", type, " Name: ", name)
+
+
+        # uniform validation
+        countUniforms = glGetProgramiv(shader.id, GL_ACTIVE_UNIFORMS)
+        #print("Active Uniforms: ", countUniforms)
+        for i in range(countUniforms):
+            glGetActiveUniform(shader.id, i, bufSize, length, size, type, name)
+            print("Attribute #", i, " Type: ", type, " Name: ", name)
+
 
         pygame.display.flip()
 

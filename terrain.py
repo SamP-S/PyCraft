@@ -10,6 +10,7 @@ import numpy as np
 
 import maths3d
 import noise
+import shaders
 
 
 print("terrain.py")
@@ -160,6 +161,8 @@ class chunk:
         model = maths3d.m4_translatev(self.pos)
         uni = glGetUniformLocation(shader.id, "model")
         glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
+        shaders.glErrorCheck()
+
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
         glDrawArrays(GL_QUADS, 0, self.vertices.size)

@@ -5,8 +5,8 @@ from OpenGL.GLU import *
 
 
 def glErrorCheck():
-    error = glGetError()
-    if error != GL_NO_ERROR:
+    err = glGetError()
+    if err != GL_NO_ERROR:
         print("OPENGL_ERROR: ", gluErrorString(error))
 
 def glShaderErrorCheck(shader):
@@ -85,7 +85,7 @@ class shader:
         out vec4 fragColour;
         void main()
         {
-            fragColour = solidColour;
+            fragColour = vec4(1, 1, 1, 1);
         }
         """
         id = self.create(GL_FRAGMENT_SHADER, f)
