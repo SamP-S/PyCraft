@@ -71,6 +71,8 @@ class chunk:
         self.vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, self.vertices.itemsize * len(self.vertices) , self.vertices, GL_STATIC_DRAW)
+        print(self.vertices)
+        #shaders.glErrorCheck()
 
         # bind attributes
         glEnableVertexAttribArray(0)
@@ -161,8 +163,12 @@ class chunk:
         model = maths3d.m4_translatev(self.pos)
         uni = glGetUniformLocation(shader.id, "model")
         glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
+        print("model")
         shaders.glErrorCheck()
 
+        print(self.vertices.size)
+
+        glBindVertexArray(self.vao)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
         glDrawArrays(GL_QUADS, 0, self.vertices.size)
