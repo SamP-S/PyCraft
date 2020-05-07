@@ -4,11 +4,14 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+from random import random
+
 # custom
 import terrain
 import input
 import camera
 import timer
+import noise
 
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 360
@@ -50,8 +53,8 @@ def main():
 
     # lighting
     lightCol = [ 1.0, 1.0, 0.9, 1.0 ]
-    lightPos = [ 5.0, 70.0, 5.0, 1.0 ]
-    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, [1.0, 1.0, 1.0])
+    lightPos = [ 8.0, 70.0, 8.0, 1.0 ]
+    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0)
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightCol)
     glShadeModel (GL_FLAT);
     glEnable(GL_LIGHTING)
@@ -76,20 +79,13 @@ def main():
         player_cam.set()
 
         glPushMatrix()
-        #glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
-
-        glPushMatrix()
-        glPushMatrix()
         glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
         glPopMatrix()
 
         chunk.render()
         glPopMatrix()
 
-        glPopMatrix()
-
-        glPopMatrix()
-
+        #print(noise.perlin(0, 0, round(random()*100)))
         pygame.display.flip()
 
         # fps counter

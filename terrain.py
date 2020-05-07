@@ -6,8 +6,10 @@ from OpenGL.GLU import *
 
 from random import random
 from enum import IntEnum
-
 import numpy as np
+
+import vectors
+import noise
 
 
 print("terrain.py")
@@ -15,6 +17,7 @@ print("terrain.py")
 CONST_WIDTH = 16
 CONST_DEPTH = 16
 CONST_HEIGHT = 256
+CONST_AMPLITUE = 4
 
 cubeVertices = ((0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (1.0, 0.0, 1.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0), (1.0, 1.0, 0.0))
 cubeQuads = ((0, 1, 2, 3), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0), (4, 7, 6, 5))
@@ -52,7 +55,8 @@ class FACE(IntEnum):
 
 class chunk:
 
-    def __init__(self):
+    def __init__(self, x=0, y=0, z=0):
+        self.pos = vectors.vec3(x, y, z)
         self.data = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
         self.generate()
         self.generateMesh()
@@ -73,10 +77,12 @@ class chunk:
 
 
     def generate(self):
+        perlin = noise.getPerlinIMG(2)
         for k in range(CONST_DEPTH):
-            for j in range(CONST_HEIGHT):
-                for i in range(CONST_WIDTH):
-                    if j > 63:
+            for i in range(CONST_WIDTH):
+                offset = perlin[k][i] * CONST_AMPLITUE
+                for j in range(CONST_HEIGHT):
+                    if j > 63 + offset:
                         self.data[k][j][i] = BLOCK.AIR
                     elif j < 20:
                         self.data[k][j][i] = BLOCK.STONE
@@ -152,7 +158,10 @@ class chunk:
         # draw elements
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
+        glPushMatrix()
+        glTranslatef(self.pos.x, self.pos.y, self.pos.z)
         glDrawArrays(GL_QUADS, 0, self.vertices.size)
+        glPopMatrix()
 
 
 def main():
