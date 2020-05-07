@@ -41,6 +41,7 @@ class shader:
         program = glCreateProgram()
         glAttachShader(program, vs)
         glAttachShader(program, fs)
+        glBindFragDataLocation(program, 0, "fragColour");
         glLinkProgram(program)
         glLinkErrorCheck(program)
         return program
@@ -49,9 +50,9 @@ class shader:
     uniforms = [b"model", b"view", b"proj", b"colour"]
 
     def use(self):
-        for uniform in uniforms:
-            locations[uniform] = glGetUniformLocation(program, uniform)
-        glUniform4fv(locations[b"colour"], [1.0, 1.0, 1.0, 1.0]
+        for uniform in self.uniforms:
+            self.locations[uniform] = glGetUniformLocation(self.id, uniform)
+        glUniform4f(self.locations[b"colour"], 1.0, 1.0, 1.0, 1.0)
         glUseProgram(self.id)
 
 

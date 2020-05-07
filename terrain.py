@@ -8,7 +8,7 @@ from random import random
 from enum import IntEnum
 import numpy as np
 
-import vectors
+import maths3d
 import noise
 
 
@@ -56,7 +56,7 @@ class FACE(IntEnum):
 class chunk:
 
     def __init__(self, x=0, y=0, z=0):
-        self.pos = vectors.vec3(x, y, z)
+        self.pos = maths3d.vec3(x, y, z)
         self.data = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
         self.generate()
         self.generateMesh()
@@ -73,7 +73,7 @@ class chunk:
 
         # bind attributes
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
 
     def generate(self):
