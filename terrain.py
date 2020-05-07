@@ -83,7 +83,8 @@ class chunk:
         # bind vbo
         # draw elements
 
-        model = maths3d.m4_translatev(self.pos)
+        model = maths3d.m4_translate(-self.pos.x, -self.pos.y, -self.pos.z)
+        model = maths3d.mat4()
         uni = glGetUniformLocation(shader.id, "model")
         glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
         #print("model")
@@ -93,7 +94,7 @@ class chunk:
         glBindVertexArray(self.vao)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
-        glDrawArrays(GL_QUADS, 0, self.vertices.size)
+        glDrawArrays(GL_TRIANGLES, 0, self.vertices.size)
 
 
     def generate(self):

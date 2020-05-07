@@ -94,33 +94,52 @@ if False: # comments out
         m.m[3,2] = eye.z;
         return m
 
-def m4_lookAt(eye=vec3(0.0, 0.0, 0.0)):
-    forward = v3_normalise(v3_sub(eye, to))
-    right = v3_cross(v3_normalise(tmp), forward)
-    up = v3_cross(forward, right)
+if False:
+    def m4_lookAt(eye=vec3(0.0, 0.0, 0.0), to=vec3(0.0, 0.0, -1.0), tmp=vec3(0.0, 1.0, 0.0)):
+        forward = v3_normalise(v3_sub(to, eye))
+        right = v3_cross(forward, v3_normalise(tmp))
+        up = v3_cross(v3_normalise(right), forward)
+        m = mat4()
+        m.m[0,0] = right.x
+        m.m[0,1] = right.y
+        m.m[0,2] = right.z
+        m.m[1,0] = up.x
+        m.m[1,1] = up.y
+        m.m[1,2] = up.z
+        m.m[2,0] = -forward.x
+        m.m[2,1] = -forward.y
+        m.m[2,2] = -forward.z
+        m.m[3,0] = 0
+        m.m[3,1] = 0
+        m.m[3,2] = 0
+        #print(m.m)
+        return m
+
+def m4_lookAt(forward, right, up):
     m = mat4()
-    m.m[0,0] = right.x;
-    m.m[0,1] = right.y;
-    m.m[0,2] = right.z;
-    m.m[1,0] = up.x;
-    m.m[1,1] = up.y;
-    m.m[1,2] = up.z;
-    m.m[2,0] = forward.x;
-    m.m[2,1] = forward.y;
-    m.m[2,2] = forward.z;
-    m.m[3,0] = eye.x;
-    m.m[3,1] = eye.y;
-    m.m[3,2] = eye.z;
+    m.m[0,0] = right.x
+    m.m[0,1] = right.y
+    m.m[0,2] = right.z
+    m.m[1,0] = up.x
+    m.m[1,1] = up.y
+    m.m[1,2] = up.z
+    m.m[2,0] = -forward.x
+    m.m[2,1] = -forward.y
+    m.m[2,2] = -forward.z
+    print(m.m)
     return m
 
 
-def m4_projection(fov=90, aspect=(16/9), near=0.1, far=1000):
+def m4_projection(fov=45, aspect=(16/9), near=0.1, far=1000):
     m = mat4()
     f = 1 / math.tan(math.radians(fov / 2))
     m.m[0,0] = f / aspect
     m.m[1,1] = f
-    m.m[2,2] = (far + near) / (near - far)
-    m.m[3,3] = 0
-    m.m[3,2] = -1
+
+    m.m[2,2] = -(far + near) / (near - far)
     m.m[2,3] = 2 * far * near / (near - far)
+
+    m.m[3,2] = 1
+    m.m[3,3] = 0
+    #print(m.m)
     return m
