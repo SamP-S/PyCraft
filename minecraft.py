@@ -48,21 +48,48 @@ def main():
     chunk = terrain.chunk()
     player_cam = camera.camera()
 
+    # lighting
+    lightCol = [ 1.0, 1.0, 0.9, 1.0 ]
+    lightPos = [ 5.0, 70.0, 5.0, 1.0 ]
+    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, [1.0, 1.0, 1.0])
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightCol)
+    glShadeModel (GL_FLAT);
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    # draw order
+    glEnable(GL_DEPTH_TEST)
+    # back face culling
+    glFrontFace(GL_CW)
+    glCullFace(GL_BACK)
+    glEnable(GL_CULL_FACE)
+
     frametimer = timer.timer()
     while True:
+
+
         handleEvents()
         player_cam.process(keyboard, mouse)
-
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_CULL_FACE)
 
         glPushMatrix()
         player_cam.setPerspective()
         player_cam.set()
 
+        glPushMatrix()
+        #glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
+
+        glPushMatrix()
+        glPushMatrix()
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
+        glPopMatrix()
+
         chunk.render()
         glPopMatrix()
+
+        glPopMatrix()
+
+        glPopMatrix()
+
         pygame.display.flip()
 
         # fps counter

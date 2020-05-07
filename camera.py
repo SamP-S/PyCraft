@@ -36,7 +36,7 @@ class camera:
 
     def setPerspective(self):
         glLoadIdentity()
-        gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
+        gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000)
 
 
     def process(self, keyboard, mouse):

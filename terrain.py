@@ -150,7 +150,6 @@ class chunk:
         # bind vertex_array_object
         # bind vbo
         # draw elements
-
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glVertexPointer(3, GL_FLOAT, 0, None)
         glDrawArrays(GL_QUADS, 0, self.vertices.size)
