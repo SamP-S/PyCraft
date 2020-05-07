@@ -10,7 +10,7 @@ import input
 import timer
 import vectors
 
-CONST_SPEED = 5;
+CONST_SPEED = 10;
 MOUSE_SENS = 0.4;
 
 class camera:

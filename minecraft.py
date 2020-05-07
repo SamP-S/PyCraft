@@ -1,7 +1,10 @@
 import pygame
 from pygame.locals import *
 
+from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
+from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVertexArray
+
 from OpenGL.GLU import *
 
 from random import random
@@ -12,14 +15,28 @@ import input
 import camera
 import timer
 import noise
+import shaders
 
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 360
 
 
+def quadCube():
+    cubeVertices = ((-1, -1, -1), (-1, -1, 1), (1, -1, 1), (1, -1, -1), (-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1))
+    cubeQuads = ((0, 1, 2, 3), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0), (4, 7, 6, 5))
+    glColor3f(1.0, 0.0, 0.0)
+    glDisable(GL_LIGHTING)
+    glBegin(GL_QUADS)
+    for cubeQuad in cubeQuads:
+        for cubeVertex in cubeQuad:
+            glVertex3fv(cubeVertices[cubeVertex])
+    glEnd()
+    glEnable(GL_LIGHTING)
+
 # input management
 keyboard = input.keyboard()
 mouse = input.mouse()
+shader = shaders.shader()
 
 # definitions
 def glWindow():
@@ -53,8 +70,8 @@ def main():
 
     # lighting
     lightCol = [ 1.0, 1.0, 0.9, 1.0 ]
-    lightPos = [ 8.0, 70.0, 8.0, 1.0 ]
-    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0)
+    lightPos = [ 5.0, 70.0, 5.0, 1.0 ]
+    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, [1.0, 1.0, 1.0])
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightCol)
     glShadeModel (GL_FLAT);
     glEnable(GL_LIGHTING)
@@ -74,18 +91,21 @@ def main():
         player_cam.process(keyboard, mouse)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
+        shader.use()
+
         glPushMatrix()
         player_cam.setPerspective()
         player_cam.set()
 
         glPushMatrix()
         glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
+        glTranslatef(lightPos[0], lightPos[1], lightPos[2])
+        quadCube()
         glPopMatrix()
 
         chunk.render()
         glPopMatrix()
 
-        #print(noise.perlin(0, 0, round(random()*100)))
         pygame.display.flip()
 
         # fps counter

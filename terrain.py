@@ -1,4 +1,4 @@
-from OpenGL.GL import shaders
+from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
 from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVertexArray
 

@@ -89,7 +89,6 @@ class keyboard:
         for i in range(26):
             keycode = ord('a') + i
             if event.key == keycode:
-                print(chr(keycode))
                 self.keys[chr(keycode)] = state
                 return
 
