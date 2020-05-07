@@ -48,8 +48,6 @@ def main():
     chunk = terrain.chunk()
     player_cam = camera.camera()
 
-    gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
-
     frametimer = timer.timer()
     while True:
         handleEvents()
@@ -60,7 +58,9 @@ def main():
         glEnable(GL_CULL_FACE)
 
         glPushMatrix()
+        player_cam.setPerspective()
         player_cam.set()
+
         chunk.render()
         glPopMatrix()
         pygame.display.flip()

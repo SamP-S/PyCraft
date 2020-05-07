@@ -33,14 +33,21 @@ xSquareEdges = ((0, 4), (4, 5), (5, 1), (1, 0))
 ySquareEdges = ((0, 1), (1, 2), (2, 3), (3, 0))
 zSquareEdges = ((3, 7), (7, 4), (4, 0), (0, 3))
 
+blockRGB = { (0.0, 0.0, 0.0, 0.0), (0.2, 1.0, 0.2, 1.0), (0.5, 0.5, 0.5, 1.0) }
+
+
+class BLOCK(IntEnum):
+    AIR = 0
+    DIRT = 1
+    STONE = 2
 
 class FACE(IntEnum):
-    TOP = 0
-    BOTTOM = 1
-    RIGHT = 2
-    LEFT = 3
-    FRONT = 4
-    BACK = 5
+    LEFT = 0
+    RIGHT = 1
+    BOTTOM = 2
+    TOP = 3
+    BACK = 4
+    FRONT = 5
 
 
 class chunk:
@@ -69,10 +76,12 @@ class chunk:
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
-                    if j > 1:
-                        self.data[k][j][i] = 0
+                    if j > 63:
+                        self.data[k][j][i] = BLOCK.AIR
+                    elif j < 20:
+                        self.data[k][j][i] = BLOCK.STONE
                     else:
-                        self.data[k][j][i] = 1
+                        self.data[k][j][i] = BLOCK.DIRT
 
 
     def addMesh(self, face, x, y, z):
@@ -81,7 +90,6 @@ class chunk:
             vertex = cubeVertices[index]
             arr = np.array([x + vertex[0], y + vertex[1], z + vertex[2]], dtype='f')
             self.vertices = np.append(self.vertices, arr)
-            print(self.vertices, " <- ", arr)
 
 
     def generateMesh(self):

@@ -20,7 +20,7 @@ class camera:
     # Camera by default looks towards -z direction
 
     def __init__(self):
-        self.pos = vectors.vec3(0, 2, 5)
+        self.pos = vectors.vec3(0, 64, 0)
         self.vAngle = 0
         self.hAngle = 0
         self.timer = timer.timer()
@@ -33,6 +33,10 @@ class camera:
     def set(self):
         gluLookAt(0, 0, 0, self.forward.x, self.forward.y, self.forward.z, self.up.x, self.up.y, self.up.z)
         glTranslatef(-self.pos.x, -self.pos.y, -self.pos.z) # negative for inverse
+
+    def setPerspective(self):
+        glLoadIdentity()
+        gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
 
 
     def process(self, keyboard, mouse):
