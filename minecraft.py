@@ -36,7 +36,6 @@ def quadCube():
 # input management
 keyboard = input.keyboard()
 mouse = input.mouse()
-shader = shaders.shader()
 
 # definitions
 def glWindow():
@@ -65,17 +64,14 @@ def handleEvents():
 def main():
     print("minecraft")
     glWindow()
+    shader = shaders.shader()
     chunk = terrain.chunk()
     player_cam = camera.camera()
 
     # lighting
     lightCol = [ 1.0, 1.0, 0.9, 1.0 ]
     lightPos = [ 5.0, 70.0, 5.0, 1.0 ]
-    glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, [1.0, 1.0, 1.0])
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightCol)
-    glShadeModel (GL_FLAT);
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
+
     # draw order
     glEnable(GL_DEPTH_TEST)
     # back face culling
@@ -98,7 +94,6 @@ def main():
         player_cam.set()
 
         glPushMatrix()
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
         glTranslatef(lightPos[0], lightPos[1], lightPos[2])
         quadCube()
         glPopMatrix()
