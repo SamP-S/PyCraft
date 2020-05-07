@@ -4,7 +4,7 @@ class timer:
 
     def __init__(self):
         self.start = time.time()
-        print("init timer")
+        #print("init timer")
 
     def start(self):
         self.reset()

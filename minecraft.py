@@ -78,6 +78,7 @@ def main():
     glEnable(GL_CULL_FACE)
 
     frametimer = timer.timer()
+    print("start")
     while True:
 
 
