@@ -81,19 +81,24 @@ def main():
         # vao
         vao = GLuint(-1)
         glGenVertexArrays(1, vao)
-        glBindVertexArray(vao)
+        #glBindVertexArray(vao)
 
-        attrib = glGetAttribLocation(shader.id, "position")
-        glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, ctypes.c_void_p(0))
-        glEnableVertexAttribArray(attrib)
+        vao2 = GLuint(-1)
+        glGenVertexArrays(1, vao2)
+
+        #attrib = glGetAttribLocation(shader.id, "position")
+        #glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, ctypes.c_void_p(0))
+        #glEnableVertexAttribArray(attrib)
         #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, None)
         # vbo
         vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBufferData(GL_ARRAY_BUFFER, cubeVertices.itemsize * cubeVertices.size, cubeVertices, GL_STATIC_DRAW)
+        glVertexPointer(3, GL_FLOAT, cubeVertices.itemsize * 3, vbo )
         # print
         print("Attrib:")
         print("VAO: ", vao)
+        print("VAO2: ", vao2)
         print("VBO: ", vbo)
         print("size: ", cubeVertices.size)
         print("float: ", cubeVertices.itemsize)
