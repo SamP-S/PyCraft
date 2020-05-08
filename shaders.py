@@ -66,6 +66,8 @@ class shader:
         uniform mat4 view;
         uniform mat4 proj;
 
+        uniform mat4 cameraModel;
+
         uniform vec4 colour;
 
         out vec4 solidColour;
@@ -86,7 +88,7 @@ class shader:
         out vec4 fragColour;
         void main()
         {
-            fragColour = vec4(1, 1, 1, 1);
+            fragColour = solidColour;
         }
         """
         id = self.create(GL_FRAGMENT_SHADER, f)
