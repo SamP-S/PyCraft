@@ -74,8 +74,7 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * modelBlock * modelChunk * vec4(position, 1.0);
-            gl_Position = vec4(position, 1);
+            gl_Position = proj * view * vec4(position, 1.0);
         }
         """
         id = self.create(GL_VERTEX_SHADER, v)

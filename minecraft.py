@@ -73,42 +73,43 @@ def main():
     test = True
     if test == True:
         # data
-        cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype='float32')
-        cubeQuads = ((0,3,6,4),(2,5,6,3),(1,2,5,7),(1,0,4,7),(7,4,6,5),(2,3,0,1))
-        # shader
-        shader = shaders.shader()
-        shader.use()
+        cube = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,
+                        1.0, 1.0, 1.0,   1.0, 1.0, 0.0],
+                        dtype=np.float32)
+        #shader
+        #shader = shaders.shader()
+        #player_cam = camera.camera()
         # vao
-        vao = GLuint(-1)
-        glGenVertexArrays(1, vao)
+        #vao = GLuint(-1)
+        #glGenVertexArrays(1, vao)
         #glBindVertexArray(vao)
-
-        vao2 = GLuint(-1)
-        glGenVertexArrays(1, vao2)
-
-        #attrib = glGetAttribLocation(shader.id, "position")
-        #glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, ctypes.c_void_p(0))
-        #glEnableVertexAttribArray(attrib)
-        #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, None)
         # vbo
         vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
-        glBufferData(GL_ARRAY_BUFFER, cubeVertices.itemsize * cubeVertices.size, cubeVertices, GL_STATIC_DRAW)
-        glVertexPointer(3, GL_FLOAT, cubeVertices.itemsize * 3, vbo )
-        # print
-        print("Attrib:")
-        print("VAO: ", vao)
-        print("VAO2: ", vao2)
-        print("VBO: ", vbo)
-        print("size: ", cubeVertices.size)
-        print("float: ", cubeVertices.itemsize)
-        print("None: ", None)
-        print(None == 0)
-        print("c_void_p: ", ctypes.c_void_p(0))
-        # draw
-        glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
-        pygame.display.flip()
-        return
+        glBufferData(GL_ARRAY_BUFFER, cube.itemsize * cube.size, cube, GL_STATIC_DRAW)
+        # attributes
+        #attrib = glGetAttribLocation(shader.id, "position")
+        attrib = 0
+        glEnableVertexAttribArray(attrib)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+        # projections
+        gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
+        glTranslatef(0, 0, -5)
+        # main
+        while True:
+            glRotatef(0.01, 1, 1, 1)
+            handleEvents()
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            # setup
+            #player_cam.set(shader)
+            #shader.use()
+            #glBindVertexArray(vao)
+            glBindBuffer(GL_ARRAY_BUFFER, vbo)
+            glVertexPointer(3, GL_FLOAT, 0, None)
+            #draw
+            glDrawArrays(GL_TRIANGLES, 0, cube.size)
+            pygame.display.flip()
 #########################################
 
     shader = shaders.shader()
