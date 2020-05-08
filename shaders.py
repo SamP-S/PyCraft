@@ -6,7 +6,6 @@ from OpenGL.GLU import *
 
 def glErrorCheck():
     err = glGetError()
-    print(err)
     if err != GL_NO_ERROR:
         print("OPENGL_ERROR: ", gluErrorString(error))
 
@@ -47,13 +46,12 @@ class shader:
         glLinkErrorCheck(program)
         return program
 
-    locations = {}
-    uniforms = [b"model", b"view", b"proj", b"colour"]
+    #locations = {}
+    #uniforms = [b"model", b"view", b"proj", b"colour"]
 
     def use(self):
-        for uniform in self.uniforms:
-            self.locations[uniform] = glGetUniformLocation(self.id, uniform)
-        glUniform4f(self.locations[b"colour"], 1.0, 1.0, 1.0, 1.0)
+        #for uniform in self.uniforms:
+        #    self.locations[uniform] = glGetUniformLocation(self.id, uniform)
         glUseProgram(self.id)
 
 
@@ -62,7 +60,8 @@ class shader:
         #version 330
         layout(location = 0) in vec3 position;
 
-        uniform mat4 model;
+        uniform mat4 modelChunk;
+        uniform mat4 modelBlock;
         uniform mat4 view;
         uniform mat4 proj;
 
@@ -75,7 +74,8 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * model * vec4(position, 1.0);
+            gl_Position = proj * view * modelBlock * modelChunk * vec4(position, 1.0);
+            gl_Position = vec4(position, 1);
         }
         """
         id = self.create(GL_VERTEX_SHADER, v)
@@ -88,7 +88,7 @@ class shader:
         out vec4 fragColour;
         void main()
         {
-            fragColour = solidColour;
+            fragColour = vec4(1, 1, 1, 1);
         }
         """
         id = self.create(GL_FRAGMENT_SHADER, f)

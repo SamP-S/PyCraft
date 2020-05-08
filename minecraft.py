@@ -7,6 +7,9 @@ from OpenGL.GL import *
 from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVertexArray
 from OpenGL.GLU import *
 
+from ctypes import sizeof, c_float, c_void_p, c_uint
+import ctypes
+
 from random import random
 
 # custom
@@ -16,20 +19,11 @@ import camera
 import timer
 import noise
 import shaders
+import maths3d
 
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 360
 
-
-def quadCube():
-    cubeVertices = ((-1, -1, -1), (-1, -1, 1), (1, -1, 1), (1, -1, -1), (-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1))
-    cubeQuads = ((0, 1, 2, 3), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0), (4, 7, 6, 5))
-    glColor3f(1.0, 0.0, 0.0)
-    glBegin(GL_QUADS)
-    for cubeQuad in cubeQuads:
-        for cubeVertex in cubeQuad:
-            glVertex3fv(cubeVertices[cubeVertex])
-    glEnd()
 
 # input management
 keyboard = input.keyboard()
@@ -62,8 +56,58 @@ def handleEvents():
 def main():
     print("minecraft")
     glWindow()
+
+#########################################
+    depricated = False
+    if depricated == True:
+        cubeVertices = ((1,1,1),(1,1,-1),(1,-1,-1),(1,-1,1),(-1,1,1),(-1,-1,-1),(-1,-1,1),(-1,1,-1))
+        cubeQuads = ((0,3,6,4),(2,5,6,3),(1,2,5,7),(1,0,4,7),(7,4,6,5),(2,3,0,1))
+        glBegin(GL_QUADS)
+        for cubeQuad in cubeQuads:
+            for cubeVertex in cubeQuad:
+                glVertex3fv(cubeVertices[cubeVertex])
+        glEnd()
+        pygame.display.flip()
+        return
+#########################################
+    test = True
+    if test == True:
+        # data
+        cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype='float32')
+        cubeQuads = ((0,3,6,4),(2,5,6,3),(1,2,5,7),(1,0,4,7),(7,4,6,5),(2,3,0,1))
+        # shader
+        shader = shaders.shader()
+        shader.use()
+        # vao
+        vao = GLuint(-1)
+        glGenVertexArrays(1, vao)
+        glBindVertexArray(vao)
+
+        attrib = glGetAttribLocation(shader.id, "position")
+        glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(attrib)
+        #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, None)
+        # vbo
+        vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        glBufferData(GL_ARRAY_BUFFER, cubeVertices.itemsize * cubeVertices.size, cubeVertices, GL_STATIC_DRAW)
+        # print
+        print("Attrib:")
+        print("VAO: ", vao)
+        print("VBO: ", vbo)
+        print("size: ", cubeVertices.size)
+        print("float: ", cubeVertices.itemsize)
+        print("None: ", None)
+        print(None == 0)
+        print("c_void_p: ", ctypes.c_void_p(0))
+        # draw
+        glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
+        pygame.display.flip()
+        return
+#########################################
+
     shader = shaders.shader()
-    chunk = terrain.chunk()
+    land = terrain.terrain()
     player_cam = camera.camera()
 
     # lighting
@@ -87,7 +131,9 @@ def main():
 
         shader.use()
         player_cam.set(shader)
-        chunk.render(shader)
+        #land.render(shader)
+
+        shaders.glErrorCheck()
 
         debug = False
         if debug == True:

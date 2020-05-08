@@ -40,9 +40,9 @@ class camera:
         self.view = maths3d.m4_lookAt(self.forward, self.right, self.up)
         #model = maths3d.m4_translate(-self.pos.x, -self.pos.y, -self.pos.z)
         model = maths3d.mat4()
-        #self.view = maths3d.mat4()
 
-        #self.view = maths3d.m4_translate(0, -60, 0)
+        self.view = maths3d.mat4()
+        self.proj = maths3d.mat4()
 
         uni = glGetUniformLocation(shader.id, "proj")
         glUniformMatrix4fv(uni, 1, GL_TRUE, self.proj.m)
