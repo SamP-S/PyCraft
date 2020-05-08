@@ -25,10 +25,26 @@ def glLinkErrorCheck(program):
 class shader:
 
     def __init__(self):
+
+        self.attribs = [b"position"]
+        self.locations = dict((k, v) for (v, k) in enumerate(self.attribs))
+        self.uniforms = [b"proj", b"view", b"modelChunk", b"modelBlock"]
+
         vs = self.vertex()
         fs = self.fragment()
-        self.id = self.program(vs, fs)
-        glUseProgram(self.id)
+
+        program = glCreateProgram()
+        glAttachShader(program, vs)
+        glAttachShader(program, fs)
+        for attrib in self.attribs:
+                glBindAttribLocation(program, self.locations[attrib], attrib)
+        #glBindFragDataLocation(program, 0, "fragColour");
+        glLinkProgram(program)
+        glLinkErrorCheck(program)
+        for uniform in self.uniforms:
+            self.locations[uniform] = glGetUniformLocation(program, uniform)
+        glUseProgram(program)
+        self.id = program
 
     def create(self, type, source):
         shader = glCreateShader(type)
@@ -37,14 +53,6 @@ class shader:
         glShaderErrorCheck(shader)
         return shader
 
-    def program(self, vs, fs):
-        program = glCreateProgram()
-        glAttachShader(program, vs)
-        glAttachShader(program, fs)
-        glBindFragDataLocation(program, 0, "fragColour");
-        glLinkProgram(program)
-        glLinkErrorCheck(program)
-        return program
 
     #locations = {}
     #uniforms = [b"model", b"view", b"proj", b"colour"]

@@ -15,7 +15,7 @@ from random import random
 # custom
 import terrain
 import input
-import camera
+import cameras
 import timer
 import noise
 import shaders
@@ -78,43 +78,46 @@ def main():
                         1.0, 1.0, 1.0,   1.0, 1.0, 0.0],
                         dtype=np.float32)
         #shader
-        #shader = shaders.shader()
-        #player_cam = camera.camera()
+        shader = shaders.shader()
+        camera = cameras.camera()
         # vao
-        #vao = GLuint(-1)
-        #glGenVertexArrays(1, vao)
-        #glBindVertexArray(vao)
+        vao = GLuint(-1)
+        glGenVertexArrays(1, vao)
+        glBindVertexArray(vao)
         # vbo
         vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBufferData(GL_ARRAY_BUFFER, cube.itemsize * cube.size, cube, GL_STATIC_DRAW)
         # attributes
-        #attrib = glGetAttribLocation(shader.id, "position")
-        attrib = 0
-        glEnableVertexAttribArray(attrib)
+        for attrib in shader.attribs:
+            glEnableVertexAttribArray(shader.locations[attrib])
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
         # projections
-        gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
-        glTranslatef(0, 0, -5)
+        #gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
+        #glTranslatef(0, 0, -5)
         # main
         while True:
-            glRotatef(0.01, 1, 1, 1)
+            #glRotatef(0.01, 1, 1, 1)
             handleEvents()
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
             # setup
-            #player_cam.set(shader)
-            #shader.use()
-            #glBindVertexArray(vao)
+            shader.use()
+            glBindVertexArray(vao)
             glBindBuffer(GL_ARRAY_BUFFER, vbo)
             glVertexPointer(3, GL_FLOAT, 0, None)
-            #draw
+            # uniforms
+            glUniformMatrix4fv(shader.locations[b"proj"], 1, GL_TRUE, maths3d.mat4().m)
+            glUniformMatrix4fv(shader.locations[b"view"], 1, GL_TRUE, maths3d.mat4().m)
+            glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, GL_TRUE, maths3d.mat4().m)
+            glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_TRUE, maths3d.mat4().m)
+            # draw
             glDrawArrays(GL_TRIANGLES, 0, cube.size)
             pygame.display.flip()
 #########################################
 
     shader = shaders.shader()
     land = terrain.terrain()
-    player_cam = camera.camera()
+    camera = cameras.camera()
 
     # lighting
     lightCol = [ 1.0, 1.0, 0.9, 1.0 ]
@@ -132,7 +135,7 @@ def main():
     while True:
 
         handleEvents()
-        player_cam.process(keyboard, mouse)
+        camera.process(keyboard, mouse)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         shader.use()

@@ -31,24 +31,28 @@ class camera:
         self.right = maths3d.vec3(-1, 0, 0)
         self.up = maths3d.vec3(0, 1, 0)
 
+        self.proj = maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000)
+        self.view = maths3d.m4_translate(0, 0, -5)
+
     def set(self, shader):
         self.proj = maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000)
 
         #self.view = maths3d.m4_lookAt(self.pos, maths3d.v3_add(self.pos, self.forward), self.up)
         #self.view = maths3d.m4_lookAt(maths3d.vec3(), self.forward, self.up)
         #self.view = maths3d.m4_lookAt(self.forward, self.right, self.up)
-        self.view = maths3d.m4_lookAt(self.forward, self.right, self.up)
+        #self.view = maths3d.m4_lookAt(self.forward, self.right, self.up)
         #model = maths3d.m4_translate(-self.pos.x, -self.pos.y, -self.pos.z)
         model = maths3d.mat4()
 
-        self.view = maths3d.mat4()
-        self.proj = maths3d.mat4()
+        self.view = maths3d.m4_translate(0, 0, -5)
+        #self.view = maths3d.mat4()
+        #self.proj = maths3d.mat4()
 
         uni = glGetUniformLocation(shader.id, "proj")
         glUniformMatrix4fv(uni, 1, GL_TRUE, self.proj.m)
         uni = glGetUniformLocation(shader.id, "view")
         glUniformMatrix4fv(uni, 1, GL_TRUE, self.view.m)
-        uni = glGetUniformLocation(shader.id, "cameraModel")
+        #uni = glGetUniformLocation(shader.id, "cameraModel")
         #glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
 
         #gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000)
@@ -61,6 +65,9 @@ class camera:
 
         self.move(keyboard)
         self.look(mouse)
+
+        # make update
+        self.view = maths3d.m4_translate(0, 0, -5)
 
 
     def look(self, mouse):
