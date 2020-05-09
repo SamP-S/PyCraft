@@ -24,6 +24,13 @@ CONST_AMPLITUE = 4
 cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype=np.float32)
 cubeIndices = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.uint32)
 
+cubeFaceIndicies = np.array([[0, 1, 5, 5, 4, 0],
+                            [2, 3, 7, 7, 6, 2],
+                            [0, 3, 2, 2, 1, 0],
+                            [4, 5, 6, 6, 7, 4],
+                            [3, 0, 4, 4, 7, 3],
+                            [1, 2, 6, 6, 5, 1]], dtype=np.uint32)
+
 leftFace = np.array([0, 1, 5, 5, 4, 0], dtype=np.uint32)
 rightFace = np.array([2, 3, 7, 7, 6, 2], dtype=np.uint32)
 bottomFace = np.array([0, 3, 2, 2, 1, 0], dtype=np.uint32)
@@ -136,9 +143,10 @@ class chunk:
     def __init__(self, x=0, y=0, z=0):
         self.pos = maths3d.vec3(x, y, z)
         self.blocks = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
+        self.vertices = np.array([], dtype=np.float32)
+        self.vbo = GLuint(-1)
         self.generate()
         self.generateMesh()
-
 
     def render(self, shader):
         model = maths3d.m4_translatev(self.pos)
@@ -165,6 +173,7 @@ class chunk:
                         self.blocks[k][j][i] = block(BLOCK.DIRT, maths3d.vec3(i, j, k))
 
     def generateMesh(self):
+        self.vertices = np.array([1], dtype=np.float32)
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
@@ -208,8 +217,19 @@ class chunk:
                         elif self.blocks[k + 1][j][i].type == 0:
                             faces.append(FACE.FRONT)
 
-                        self.blocks[k][j][i].setFaces(faces)
+                        self.addFaces(faces, i, j, k)
 
+
+
+    def addFaces(self, faces, x, y, z):
+        v = np.array([], dtype=np.float32)
+        for face in faces:
+            indicies = cubeFaceIndicies[face]
+            for indicie in indicies:
+                v.append(cubeVertices[indicie * 3] + x)
+                self.vertices.append(cubeVertices[indicie * 3] + x)
+                self.vertices.append(cubeVertices[indicie * 3 + 1] + y)
+                self.vertices.append(cubeVertices[indicie * 3 + 2] + z)
 
     def print(self):
         for k in range(CONST_DEPTH):
