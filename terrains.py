@@ -20,16 +20,15 @@ CONST_DEPTH = 16
 CONST_HEIGHT = 256
 CONST_AMPLITUE = 4
 
-cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype='f')
-#cubeQuads = ((0, 1, 2, 3), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0), (4, 7, 6, 5))
-#cubeEdges = ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7))
+cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype=np.float32)
+cubeIndices = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.uint32)
 
-leftFace = np.array([0, 4, 5, 5, 1, 0], dtype='uint32')
-rightFace = np.array([2, 6, 7, 7, 3, 2], dtype='uint32')
-bottomFace = np.array([0, 1, 2, 2, 3, 0], dtype='uint32')
-topFace = np.array([4, 7, 6, 6, 5, 4], dtype='uint32')
-backFace = np.array([3, 7, 4, 4, 0, 3], dtype='uint32')
-frontFace = np.array([1, 5, 6, 6, 2, 1], dtype='uint32')
+leftFace = np.array([0, 4, 5, 5, 1, 0], dtype=np.uint32)
+rightFace = np.array([2, 6, 7, 7, 3, 2], dtype=np.uint32)
+bottomFace = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+topFace = np.array([4, 7, 6, 6, 5, 4], dtype=np.uint32)
+backFace = np.array([3, 7, 4, 4, 0, 3], dtype=np.uint32)
+frontFace = np.array([1, 5, 6, 6, 2, 1], dtype=np.uint32)
 
 
 blockRGB = [ np.array([0.0, 0.0, 0.0, 0.0], dtype='f'), np.array([0.2, 1.0, 0.2, 1.0], dtype='f'), np.array([0.5, 0.5, 0.5, 1.0], dtype='f') ]
@@ -52,6 +51,8 @@ class FACE(IntEnum):
 # vertex_buffer_object
 def createBufferObjects():
     global cubeVBO
+    global cubeEBO
+
     global leftEBO
     global rightEBO
     global bottomEBO
@@ -62,6 +63,10 @@ def createBufferObjects():
     cubeVBO = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
     glBufferData(GL_ARRAY_BUFFER, cubeVertices, GL_STATIC_DRAW)
+
+    cubeEBO = glGenBuffers(1)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEBO)
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, cubeIndices, GL_STATIC_DRAW)
 
     # element_buffer_objects
     leftEBO = glGenBuffers(1)
@@ -103,17 +108,8 @@ class block:
         if len(self.faces) == 0:
             return
 
-        model = maths3d.m4_translate(-self.pos.x, -self.pos.y, -self.pos.z)
-        model = maths3d.mat4()
-        uni = glGetUniformLocation(shader.id, "modelBlock")
-        glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
-
-        uni = glGetUniformLocation(shader.id, "colour")
-        colour = blockRGB[self.type]
-        glUniform4f(uni, colour[0], colour[1], colour[2], colour[3])
-
-        #return
-        #glDrawElements <- 6 indicies for square
+        model = maths3d.m4_translatev(self.pos)
+        glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, GL_FALSE, model.m)
 
         for face in self.faces:
             if face == FACE.LEFT:
@@ -128,13 +124,10 @@ class block:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backEBO)
             if face == FACE.FRONT:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, frontEBO)
-            #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cubeVBO)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, leftEBO)
-            
-            #glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
 
-            #glDrawElements(GL_TRIANGLES, len(leftFace), GL_UNSIGNED_BYTE, None)
-            #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, leftFace)
+            #glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bottomEBO)
+            #glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
+            glDrawElements(GL_TRIANGLES,6, GL_UNSIGNED_INT, None)
 
 
 class chunk:
@@ -147,10 +140,9 @@ class chunk:
 
 
     def render(self, shader):
-        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
-        glVertexPointer(3, GL_FLOAT, 0, None)
+        model = maths3d.m4_translatev(self.pos)
+        glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_FALSE, model.m)
 
-        glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
 
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
@@ -239,6 +231,7 @@ class terrain:
 
 
     def render(self, shader):
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
         for k in range(self.MAX_Z):
             for j in range(self.MAX_Y):
                 for i in range(self.MAX_X):

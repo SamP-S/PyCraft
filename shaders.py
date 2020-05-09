@@ -83,7 +83,7 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * vec4(position, 1.0);
+            gl_Position = proj * view * modelChunk * modelBlock * vec4(position, 1.0);
         }
         """
         return self.create(GL_VERTEX_SHADER, v)

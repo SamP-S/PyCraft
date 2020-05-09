@@ -74,6 +74,11 @@ def m4_scale(x, y, z):
 def m4_scalev(v):
     return m4_scale(v.x, v.y, v.z)
 
+def m4_mul(a, b):
+    m = mat4()
+    m.m = np.matmul(a.m, b.m)
+    return m
+
 if False: # comments out
     def m4_lookAt(eye=vec3(0.0, 0.0, 0.0), to=vec3(0.0, 0.0, -1.0), tmp=vec3(0.0, 1.0, 0.0)):
         forward = v3_normalise(v3_sub(to, eye))
@@ -89,34 +94,28 @@ if False: # comments out
         m.m[2,0] = -forward.x
         m.m[2,1] = -forward.y
         m.m[2,2] = -forward.z
-        m.m[3,0] = -eye.x;
-        m.m[3,1] = -eye.y;
-        m.m[3,2] = -eye.z;
         #print(m.m)
         return m
 
-if False:
+if True:
     def m4_lookAt(eye=vec3(0.0, 0.0, 0.0), to=vec3(0.0, 0.0, -1.0), tmp=vec3(0.0, 1.0, 0.0)):
         forward = v3_normalise(v3_sub(to, eye))
         right = v3_cross(forward, v3_normalise(tmp))
         up = v3_cross(v3_normalise(right), forward)
         m = mat4()
         m.m[0,0] = right.x
-        m.m[0,1] = right.y
-        m.m[0,2] = right.z
-        m.m[1,0] = up.x
+        m.m[0,1] = up.x
+        m.m[0,2] = -forward.x
+        m.m[1,0] = right.y
         m.m[1,1] = up.y
-        m.m[1,2] = up.z
-        m.m[2,0] = -forward.x
-        m.m[2,1] = -forward.y
+        m.m[1,2] = -forward.y
+        m.m[2,0] = right.z
+        m.m[2,1] = up.z
         m.m[2,2] = -forward.z
-        m.m[3,0] = 0
-        m.m[3,1] = 0
-        m.m[3,2] = 0
         #print(m.m)
         return m
 
-if True:
+if False:
     def m4_lookAt(forward, right, up):
         m = mat4()
         m.m[0,0] = right.x
@@ -128,24 +127,6 @@ if True:
         m.m[2,0] = -forward.x
         m.m[2,1] = -forward.y
         m.m[2,2] = -forward.z
-        #print(m.m)
-        return m
-
-if False:
-    def m4_lookAt(forward, right, up, pos):
-        m = mat4()
-        m.m[0,0] = right.x
-        m.m[0,1] = right.y
-        m.m[0,2] = right.z
-        m.m[1,0] = up.x
-        m.m[1,1] = up.y
-        m.m[1,2] = up.z
-        m.m[2,0] = -forward.x
-        m.m[2,1] = -forward.y
-        m.m[2,2] = -forward.z
-        m.m[3,0] = -pos.x
-        m.m[3,1] = -pos.x
-        m.m[3,2] = -pos.x
         #print(m.m)
         return m
 
