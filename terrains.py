@@ -150,20 +150,8 @@ class chunk:
         self.generate()
         self.generateMesh()
 
-        # generate VAO
-        self.vao = GLuint(0)
-        glGenVertexArrays(1, self.vao)
-        glBindVertexArray(self.vao)
-
-        glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-
 
     def render(self, shader):
-        glBindVertexArray(self.vao)
-        glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-
         glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
         glVertexPointer(3, GL_FLOAT, 0, None)
 
@@ -253,6 +241,7 @@ class terrain:
          # make dynamic chunk position
          self.chunks = [[[chunk(0, 0, 0) for i in range(self.MAX_X)] for j in range(self.MAX_Y)] for k in range(self.MAX_Z)]
          createBufferObjects()
+
 
     def render(self, shader):
         for k in range(self.MAX_Z):
