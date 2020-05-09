@@ -71,7 +71,7 @@ def main():
         return
 #########################################
     test_shader = True
-    test = True
+    test = False
     uniform_transpose = GL_FALSE
     if test == True:
         # data
@@ -138,9 +138,12 @@ def main():
     #glEnable(GL_CULL_FACE)
 
     # vertex_array_object
-    
+    vao = GLuint(-1)
+    glGenVertexArrays(1, vao)
+    glBindVertexArray(vao)
     for attrib in shader.attribs:
         glEnableVertexAttribArray(shader.locations[attrib])
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     frametimer = timer.timer()
     print("start")
@@ -156,6 +159,8 @@ def main():
         glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, maths3d.m4_translate(0, -0.5, -5).m)
         glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, uniform_transpose, maths3d.mat4().m)
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
+
+        glBindVertexArray(vao)
 
         terrain.render(shader)
 
