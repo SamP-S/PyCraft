@@ -146,7 +146,7 @@ class chunk:
 
     def __init__(self, x=0, y=0, z=0):
         self.pos = maths3d.vec3(x, y, z)
-        self.data = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
+        self.blocks = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
         self.generate()
         self.generateMesh()
 
@@ -156,52 +156,23 @@ class chunk:
         glBindVertexArray(self.vao)
 
         glEnableVertexAttribArray(0)
-        #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, None)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-
-        # generate VBO
-        #self.vbo = glGenBuffers(1)
-        #glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        #glBufferData(GL_ARRAY_BUFFER, self.vertices, GL_STATIC_DRAW)
-        #shaders.glErrorCheck()
-
-        # bind attributes
 
 
     def render(self, shader):
-        # assign uniforms
-        # bind vertex_array_object
-        # bind vbo
-        # draw elements
-
-        model = maths3d.m4_translate(-self.pos.x, -self.pos.y, -self.pos.z)
-        model = maths3d.mat4()
-        uni = glGetUniformLocation(shader.id, "modelChunk")
-        glUniformMatrix4fv(uni, 1, GL_TRUE, model.m)
-
-        #print("model")
-        #shaders.glErrorCheck()
-        #print(self.vertices.size)
-
         glBindVertexArray(self.vao)
-
         glEnableVertexAttribArray(0)
-        #glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * cubeVertices.itemsize, None)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
         glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
         glVertexPointer(3, GL_FLOAT, 0, None)
 
-        try:
-            glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
-        except:
-            print("no work")
-        return
+        glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
 
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
-                    self.data[k][j][i].render(shader)
+                    self.blocks[k][j][i].render(shader)
 
     def generate(self):
         perlin = noise.getPerlinIMG(2)
@@ -210,112 +181,57 @@ class chunk:
                 offset = perlin[k][i] * CONST_AMPLITUE
                 for j in range(CONST_HEIGHT):
                     if j > 63 + offset:
-                        self.data[k][j][i] = block(BLOCK.AIR, maths3d.vec3(i, j, k))
+                        self.blocks[k][j][i] = block(BLOCK.AIR, maths3d.vec3(i, j, k))
                     elif j < 20:
-                        self.data[k][j][i] = block(BLOCK.STONE, maths3d.vec3(i, j, k))
+                        self.blocks[k][j][i] = block(BLOCK.STONE, maths3d.vec3(i, j, k))
                     else:
-                        self.data[k][j][i] = block(BLOCK.DIRT, maths3d.vec3(i, j, k))
-
-    if False:
-        def addMesh(self, face, x, y, z):
-            quadIndicies = squareQuads[face]
-            for index in quadIndicies:
-                vertex = cubeVertices[index]
-                self.vertices = np.append(self.vertices, x + vertex[0])
-                self.vertices = np.append(self.vertices, y + vertex[1])
-                self.vertices = np.append(self.vertices, z + vertex[2])
+                        self.blocks[k][j][i] = block(BLOCK.DIRT, maths3d.vec3(i, j, k))
 
     def generateMesh(self):
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
                     # if solid -> check for visible mesh
-                    if self.data[k][j][i].type != 0:
+                    if self.blocks[k][j][i].type != 0:
                         faces = []
 
                         # left face
                         if i == 0:
                             faces.append(FACE.LEFT)
-                        elif self.data[k][j][i - 1].type == 0:
+                        elif self.blocks[k][j][i - 1].type == 0:
                             faces.append(FACE.LEFT)
 
                         # right face
                         if i == CONST_WIDTH - 1:
                             faces.append(FACE.RIGHT)
-                        elif self.data[k][j][i + 1].type == 0:
+                        elif self.blocks[k][j][i + 1].type == 0:
                             faces.append(FACE.RIGHT)
 
                         # top face
                         if j == 0:
                             faces.append(FACE.TOP)
-                        elif self.data[k][j - 1][i].type == 0:
+                        elif self.blocks[k][j - 1][i].type == 0:
                             faces.append(FACE.TOP)
 
                         # bottom face
                         if j == CONST_HEIGHT - 1:
                             faces.append(FACE.BOTTOM)
-                        elif self.data[k][j + 1][i].type == 0:
+                        elif self.blocks[k][j + 1][i].type == 0:
                             faces.append(FACE.BOTTOM)
 
                         # back face
                         if k == 0:
                             faces.append(FACE.BACK)
-                        elif self.data[k - 1][j][i].type == 0:
+                        elif self.blocks[k - 1][j][i].type == 0:
                             faces.append(FACE.BACK)
 
                         # front face
                         if k == CONST_DEPTH - 1:
                             faces.append(FACE.FRONT)
-                        elif self.data[k + 1][j][i].type == 0:
+                        elif self.blocks[k + 1][j][i].type == 0:
                             faces.append(FACE.FRONT)
 
-                        self.data[k][j][i].setFaces(faces)
-
-
-    if False:
-        def generateMesh(self):
-            self.vertices = np.array([], dtype='f')
-            for k in range(CONST_DEPTH):
-                for j in range(CONST_HEIGHT):
-                    for i in range(CONST_WIDTH):
-                        # if solid -> check for visible mesh
-                        if self.data[k][j][i] != 0:
-
-                            # left face
-                            if i == 0:
-                                self.addMesh(FACE.LEFT, i, j, k)
-                            elif self.data[k][j][i - 1] == 0:
-                                self.addMesh(FACE.LEFT, i, j, k)
-
-                            # right face
-                            if i == CONST_WIDTH - 1:
-                                self.addMesh(FACE.RIGHT, i, j, k)
-                            elif self.data[k][j][i + 1] == 0:
-                                self.addMesh(FACE.RIGHT, i, j, k)
-
-                            # top face
-                            if j == 0:
-                                self.addMesh(FACE.BOTTOM, i, j, k)
-                            elif self.data[k][j - 1][i] == 0:
-                                self.addMesh(FACE.BOTTOM, i, j, k)
-
-                            # bottom face
-                            if j == CONST_HEIGHT - 1:
-                                self.addMesh(FACE.TOP, i, j, k)
-                            elif self.data[k][j + 1][i] == 0:
-                                self.addMesh(FACE.TOP, i, j, k)
-
-                            # back face
-                            if k == 0:
-                                self.addMesh(FACE.BACK, i, j, k)
-                            elif self.data[k - 1][j][i] == 0:
-                                self.addMesh(FACE.BACK, i, j, k)
-
-                            # front face
-                            if k == CONST_DEPTH - 1:
-                                self.addMesh(FACE.FRONT, i, j, k)
-                            elif self.data[k + 1][j][i] == 0:
-                                self.addMesh(FACE.FRONT, i, j, k)
+                        self.blocks[k][j][i].setFaces(faces)
 
 
     def print(self):
@@ -324,7 +240,7 @@ class chunk:
             for j in range(CONST_HEIGHT):
                 print()
                 for i in range(CONST_WIDTH):
-                    print(self.data[k][j][i])
+                    print(self.blocks[k][j][i])
 
 
 class terrain:

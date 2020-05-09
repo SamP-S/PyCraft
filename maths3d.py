@@ -152,14 +152,14 @@ if False:
 
 def m4_projection(fov=45, aspect=(16/9), near=0.1, far=1000):
     m = mat4()
-    f = 1 / math.tan(math.radians(fov / 2))
+    f = 1 / math.tan(math.radians(fov) / 2  )
     m.m[0,0] = f / aspect
     m.m[1,1] = f
 
-    m.m[2,2] = -(far + near) / (near - far)
-    m.m[2,3] = 2 * far * near / (near - far)
+    m.m[2,2] = (far + near) / (near - far)
+    m.m[2,3] = -1
 
-    m.m[3,2] = 1
+    m.m[3,2] = 2 * far * near / (near - far)
     m.m[3,3] = 0
     #print(m.m)
     return m

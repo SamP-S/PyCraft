@@ -13,7 +13,7 @@ import ctypes
 from random import random
 
 # custom
-import terrain
+import terrains
 import input
 import cameras
 import timer
@@ -70,7 +70,9 @@ def main():
         pygame.display.flip()
         return
 #########################################
+    test_shader = True
     test = True
+    uniform_transpose = GL_FALSE
     if test == True:
         # data
         cube = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,
@@ -78,8 +80,9 @@ def main():
                         1.0, 1.0, 1.0,   1.0, 1.0, 0.0],
                         dtype=np.float32)
         #shader
-        shader = shaders.shader()
-        camera = cameras.camera()
+        if test_shader == True:
+            shader = shaders.shader()
+            camera = cameras.camera()
         # vao
         vao = GLuint(-1)
         glGenVertexArrays(1, vao)
@@ -89,34 +92,38 @@ def main():
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBufferData(GL_ARRAY_BUFFER, cube.itemsize * cube.size, cube, GL_STATIC_DRAW)
         # attributes
-        for attrib in shader.attribs:
-            glEnableVertexAttribArray(shader.locations[attrib])
+        if test_shader == True:
+            for attrib in shader.attribs:
+                glEnableVertexAttribArray(shader.locations[attrib])
+        else:
+            glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
         # projections
-        #gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
-        #glTranslatef(0, 0, -5)
+        if test_shader == False:
+            gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50)
+            glTranslatef(0, -0.5, -5)
         # main
         while True:
-            #glRotatef(0.01, 1, 1, 1)
             handleEvents()
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-            # setup
-            shader.use()
+            # shader setup
+            if test_shader == True:
+                shader.use()
+                glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50).m)
+                glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, maths3d.m4_translate(0, -0.5, -5).m)
+                glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, uniform_transpose, maths3d.mat4().m)
+                glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
+            # vertex objects setup
             glBindVertexArray(vao)
             glBindBuffer(GL_ARRAY_BUFFER, vbo)
             glVertexPointer(3, GL_FLOAT, 0, None)
-            # uniforms
-            glUniformMatrix4fv(shader.locations[b"proj"], 1, GL_TRUE, maths3d.mat4().m)
-            glUniformMatrix4fv(shader.locations[b"view"], 1, GL_TRUE, maths3d.mat4().m)
-            glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, GL_TRUE, maths3d.mat4().m)
-            glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_TRUE, maths3d.mat4().m)
             # draw
             glDrawArrays(GL_TRIANGLES, 0, cube.size)
             pygame.display.flip()
 #########################################
 
     shader = shaders.shader()
-    land = terrain.terrain()
+    terrain = terrains.terrain()
     camera = cameras.camera()
 
     # lighting
@@ -126,9 +133,14 @@ def main():
     # draw order
     glEnable(GL_DEPTH_TEST)
     # back face culling
-    glFrontFace(GL_CW)
-    glCullFace(GL_BACK)
-    glEnable(GL_CULL_FACE)
+    #glFrontFace(GL_CW)
+    #glCullFace(GL_BACK)
+    #glEnable(GL_CULL_FACE)
+
+    # vertex_array_object
+    
+    for attrib in shader.attribs:
+        glEnableVertexAttribArray(shader.locations[attrib])
 
     frametimer = timer.timer()
     print("start")
@@ -139,10 +151,14 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         shader.use()
-        player_cam.set(shader)
-        #land.render(shader)
 
-        shaders.glErrorCheck()
+        glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50).m)
+        glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, maths3d.m4_translate(0, -0.5, -5).m)
+        glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, uniform_transpose, maths3d.mat4().m)
+        glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
+
+        terrain.render(shader)
+
 
         debug = False
         if debug == True:

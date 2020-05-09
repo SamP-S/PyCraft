@@ -38,13 +38,14 @@ class shader:
         glAttachShader(program, fs)
         for attrib in self.attribs:
                 glBindAttribLocation(program, self.locations[attrib], attrib)
-        #glBindFragDataLocation(program, 0, "fragColour");
+        glBindFragDataLocation(program, 0, "fragColour");
         glLinkProgram(program)
         glLinkErrorCheck(program)
         for uniform in self.uniforms:
             self.locations[uniform] = glGetUniformLocation(program, uniform)
         glUseProgram(program)
         self.id = program
+
 
     def create(self, type, source):
         shader = glCreateShader(type)
@@ -85,8 +86,7 @@ class shader:
             gl_Position = proj * view * vec4(position, 1.0);
         }
         """
-        id = self.create(GL_VERTEX_SHADER, v)
-        return id
+        return self.create(GL_VERTEX_SHADER, v)
 
     def fragment(self):
         f = """
@@ -98,5 +98,4 @@ class shader:
             fragColour = vec4(1, 1, 1, 1);
         }
         """
-        id = self.create(GL_FRAGMENT_SHADER, f)
-        return id
+        return self.create(GL_FRAGMENT_SHADER, f)
