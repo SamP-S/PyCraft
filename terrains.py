@@ -118,25 +118,20 @@ class block:
         for face in self.faces:
             if face == FACE.LEFT:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, leftEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             if face == FACE.RIGHT:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rightEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             if face == FACE.BOTTOM:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bottomEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             if face == FACE.TOP:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, topEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             if face == FACE.BACK:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             if face == FACE.FRONT:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, frontEBO)
-                #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
             #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, cubeVBO)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, leftEBO)
-            glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
+            
+            #glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
 
             #glDrawElements(GL_TRIANGLES, len(leftFace), GL_UNSIGNED_BYTE, None)
             #glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, leftFace)
