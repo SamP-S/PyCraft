@@ -51,7 +51,7 @@ class camera:
 
 
     def look(self, mouse):
-        self.hAngle = self.dt * MOUSE_SENS * mouse.dx
+        self.hAngle -= self.dt * MOUSE_SENS * mouse.dx
         self.vAngle -= self.dt * MOUSE_SENS * mouse.dy
         mouse.dx = 0;
         mouse.dy = 0;

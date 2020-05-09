@@ -81,9 +81,9 @@ def main():
     # draw order
     glEnable(GL_DEPTH_TEST)
     # back face culling
-    #glFrontFace(GL_CW)
-    #glCullFace(GL_BACK)
-    #glEnable(GL_CULL_FACE)
+    glFrontFace(GL_CCW)
+    glCullFace(GL_BACK)
+    glEnable(GL_CULL_FACE)
 
     # vertex_array_object
     vao = GLuint(-1)
@@ -94,13 +94,10 @@ def main():
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     frametimer = timer.timer()
-    print("start")
     while True:
-
         handleEvents()
         camera.process(keyboard, mouse)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
         shader.use()
 
         glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50).m)
@@ -113,7 +110,6 @@ def main():
         glBindVertexArray(vao)
 
         terrain.render(shader)
-
 
         debug = False
         if debug == True:
@@ -140,8 +136,8 @@ def main():
         pygame.display.flip()
 
         # fps counter
-        # print(1 / frametimer.getTime())
-        # frametimer.reset()
+        print("fps: ", 1000 / frametimer.getTime())
+        frametimer.reset()
 
 
 if __name__ == "__main__":

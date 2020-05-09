@@ -10,6 +10,7 @@ import numpy as np
 
 import maths3d
 import noise
+import timer
 import shaders
 
 
@@ -23,12 +24,12 @@ CONST_AMPLITUE = 4
 cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype=np.float32)
 cubeIndices = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.uint32)
 
-leftFace = np.array([0, 4, 5, 5, 1, 0], dtype=np.uint32)
-rightFace = np.array([2, 6, 7, 7, 3, 2], dtype=np.uint32)
-bottomFace = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
-topFace = np.array([4, 7, 6, 6, 5, 4], dtype=np.uint32)
-backFace = np.array([3, 7, 4, 4, 0, 3], dtype=np.uint32)
-frontFace = np.array([1, 5, 6, 6, 2, 1], dtype=np.uint32)
+leftFace = np.array([0, 1, 5, 5, 4, 0], dtype=np.uint32)
+rightFace = np.array([2, 3, 7, 7, 6, 2], dtype=np.uint32)
+bottomFace = np.array([0, 3, 2, 2, 1, 0], dtype=np.uint32)
+topFace = np.array([4, 5, 6, 6, 7, 4], dtype=np.uint32)
+backFace = np.array([3, 0, 4, 4, 7, 3], dtype=np.uint32)
+frontFace = np.array([1, 2, 6, 6, 5, 1], dtype=np.uint32)
 
 
 blockRGB = [ np.array([0.0, 0.0, 0.0, 0.0], dtype='f'), np.array([0.2, 1.0, 0.2, 1.0], dtype='f'), np.array([0.5, 0.5, 0.5, 1.0], dtype='f') ]
@@ -142,12 +143,13 @@ class chunk:
     def render(self, shader):
         model = maths3d.m4_translatev(self.pos)
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_FALSE, model.m)
-
-
+        t = timer.timer()
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
                     self.blocks[k][j][i].render(shader)
+                    print(k * CONST_HEIGHT * CONST_WIDTH + j * CONST_WIDTH + i, ": ", t.getTime())
+                    t.reset()
 
     def generate(self):
         perlin = noise.getPerlinIMG(2)
