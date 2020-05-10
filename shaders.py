@@ -28,7 +28,7 @@ class shader:
 
         self.attribs = [b"position"]
         self.locations = dict((k, v) for (v, k) in enumerate(self.attribs))
-        self.uniforms = [b"proj", b"view", b"modelChunk", b"modelBlock"]
+        self.uniforms = [b"proj", b"view", b"modelChunk", b"modelBlock", b"colour"]
 
         vs = self.vertex()
         fs = self.fragment()
@@ -95,7 +95,7 @@ class shader:
         out vec4 fragColour;
         void main()
         {
-            fragColour = vec4(1, 1, 1, 1);
+            fragColour = solidColour;
         }
         """
         return self.create(GL_FRAGMENT_SHADER, f)

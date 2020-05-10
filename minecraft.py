@@ -69,9 +69,8 @@ def main():
 #########################################
 
     uniform_transpose = GL_FALSE
-
     shader = shaders.shader()
-    terrain = terrains.terrain()
+    terrain = terrains.terrain(shader)
     camera = cameras.camera()
 
     # lighting
@@ -93,6 +92,7 @@ def main():
         glEnableVertexAttribArray(shader.locations[attrib])
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
+    print("start")
     frametimer = timer.timer()
     while True:
         handleEvents()
@@ -100,16 +100,13 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         shader.use()
 
-        glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 50).m)
+        glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000).m)
         view = camera.view
-        #view = maths3d.m4_translatev(maths3d.v3_mulf(camera.pos, -1))
-        glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, view.m)
+        glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, camera.view.m)
         glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, uniform_transpose, maths3d.mat4().m)
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
 
         glBindVertexArray(vao)
-        #glBindBuffer(GL_ARRAY_BUFFER, terrain.chunks[0, 0, 0].vbo)
-        #glDrawArrays(GL_TRIANGLES, 0, terrain.chunks[0][0][0].vertices.size)
 
         terrain.render(shader)
         pygame.display.flip()
