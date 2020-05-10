@@ -11,7 +11,7 @@ import timer
 import maths3d
 import shaders
 
-CONST_SPEED = 10;
+CONST_SPEED = 20;
 MOUSE_SENS = 0.4;
 
 class camera:

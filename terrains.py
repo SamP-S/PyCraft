@@ -21,15 +21,24 @@ CONST_DEPTH = 16
 CONST_HEIGHT = 256
 CONST_AMPLITUE = 4
 
-cubeVertices = np.array([0.0, 0.0, 0.0,   0.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 1.0,   1.0, 1.0, 1.0,   1.0, 1.0, 0.0], dtype=np.float32)
+cubeVertices = np.array([   0.0, 0.0, 0.0,
+                            0.0, 0.0, 1.0,
+                            1.0, 0.0, 1.0,
+                            1.0, 0.0, 0.0,
+                            0.0, 1.0, 0.0,
+                            0.0, 1.0, 1.0,
+                            1.0, 1.0, 1.0,
+                            1.0, 1.0, 0.0], dtype=np.float32)
+
 cubeIndices = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.uint32)
 
-cubeFaceIndicies = np.array([[0, 1, 5, 5, 4, 0],
-                            [2, 3, 7, 7, 6, 2],
-                            [0, 3, 2, 2, 1, 0],
-                            [4, 5, 6, 6, 7, 4],
-                            [3, 0, 4, 4, 7, 3],
-                            [1, 2, 6, 6, 5, 1]], dtype=np.uint32)
+cubeFaceIndicies = np.array([   [0, 1, 5, 5, 4, 0],     # left
+                                [2, 3, 7, 7, 6, 2],     # right
+                                [0, 3, 2, 2, 1, 0],     # bottom
+                                [4, 5, 6, 6, 7, 4],     # top
+                                [3, 0, 4, 4, 7, 3],     # back
+                                [1, 2, 6, 6, 5, 1]],    # front
+                                dtype=np.uint32)
 
 leftFace = np.array([0, 1, 5, 5, 4, 0], dtype=np.uint32)
 rightFace = np.array([2, 3, 7, 7, 6, 2], dtype=np.uint32)
@@ -69,8 +78,8 @@ def createBufferObjects():
     global frontEBO
 
     cubeVBO = glGenBuffers(1)
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
-    glBufferData(GL_ARRAY_BUFFER, cubeVertices, GL_STATIC_DRAW)
+    #glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
+    #glBufferData(GL_ARRAY_BUFFER, cubeVertices, GL_STATIC_DRAW)
 
     cubeEBO = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEBO)
@@ -135,7 +144,7 @@ class block:
 
             #glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bottomEBO)
             #glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size)
-            glDrawElements(GL_TRIANGLES,6, GL_UNSIGNED_INT, None)
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
 
 
 class chunk:
@@ -144,20 +153,26 @@ class chunk:
         self.pos = maths3d.vec3(x, y, z)
         self.blocks = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
         self.vertices = np.array([], dtype=np.float32)
-        self.vbo = GLuint(-1)
         self.generate()
         self.generateMesh()
+        self.vbo = GLuint(-1)
+        self.vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+        glBufferData(GL_ARRAY_BUFFER, self.vertices, GL_STATIC_DRAW)
+        #glBufferData(GL_ARRAY_BUFFER, self.vertices.size * self.vertices.itemsize, self.vertices, GL_STATIC_DRAW)
+
 
     def render(self, shader):
         model = maths3d.m4_translatev(self.pos)
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_FALSE, model.m)
-        t = timer.timer()
+        #glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+        #glVertexPointer(3, GL_FLOAT, 0, None)
+        #glDrawArrays(GL_TRIANGLES, 0, self.vertices.size)
+        #return
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
                     self.blocks[k][j][i].render(shader)
-                    print(k * CONST_HEIGHT * CONST_WIDTH + j * CONST_WIDTH + i, ": ", t.getTime())
-                    t.reset()
 
     def generate(self):
         perlin = noise.getPerlinIMG(2)
@@ -173,7 +188,7 @@ class chunk:
                         self.blocks[k][j][i] = block(BLOCK.DIRT, maths3d.vec3(i, j, k))
 
     def generateMesh(self):
-        self.vertices = np.array([1], dtype=np.float32)
+        vertices = []
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
@@ -195,15 +210,15 @@ class chunk:
 
                         # top face
                         if j == 0:
-                            faces.append(FACE.TOP)
+                            faces.append(FACE.BOTTOM)
                         elif self.blocks[k][j - 1][i].type == 0:
-                            faces.append(FACE.TOP)
+                            faces.append(FACE.BOTTOM)
 
                         # bottom face
                         if j == CONST_HEIGHT - 1:
-                            faces.append(FACE.BOTTOM)
+                            faces.append(FACE.TOP)
                         elif self.blocks[k][j + 1][i].type == 0:
-                            faces.append(FACE.BOTTOM)
+                            faces.append(FACE.TOP)
 
                         # back face
                         if k == 0:
@@ -217,19 +232,15 @@ class chunk:
                         elif self.blocks[k + 1][j][i].type == 0:
                             faces.append(FACE.FRONT)
 
-                        self.addFaces(faces, i, j, k)
+                        self.blocks[k][j][i].setFaces(faces)
+                        for face in faces:
+                            indicies = cubeFaceIndicies[face]
+                            for indicie in indicies:
+                                vertices.append(cubeVertices[indicie * 3] + i)
+                                vertices.append(cubeVertices[indicie * 3 + 1] + j)
+                                vertices.append(cubeVertices[indicie * 3 + 2] + k)
+        self.vertices = np.array(vertices, dtype=np.float32)
 
-
-
-    def addFaces(self, faces, x, y, z):
-        v = np.array([], dtype=np.float32)
-        for face in faces:
-            indicies = cubeFaceIndicies[face]
-            for indicie in indicies:
-                v.append(cubeVertices[indicie * 3] + x)
-                self.vertices.append(cubeVertices[indicie * 3] + x)
-                self.vertices.append(cubeVertices[indicie * 3 + 1] + y)
-                self.vertices.append(cubeVertices[indicie * 3 + 2] + z)
 
     def print(self):
         for k in range(CONST_DEPTH):
@@ -249,15 +260,21 @@ class terrain:
     def __init__(self):
          # make dynamic chunk position
          self.chunks = [[[chunk(0, 0, 0) for i in range(self.MAX_X)] for j in range(self.MAX_Y)] for k in range(self.MAX_Z)]
-         createBufferObjects()
+         #createBufferObjects()
 
 
     def render(self, shader):
-        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
+        # calls render
+        #glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
+
         for k in range(self.MAX_Z):
             for j in range(self.MAX_Y):
                 for i in range(self.MAX_X):
-                    self.chunks[k][j][i].render(shader)
+                    #print(self.chunks[k][j][i].vbo)
+                    print(self.chunks[k][j][i].vbo)
+                    glBindBuffer(GL_ARRAY_BUFFER, self.chunks[k][j][i].vbo)
+                    glDrawArrays(GL_TRIANGLES, 0, self.chunks[k][j][i].vertices.size)
+                    #self.chunks[k][j][i].render(shader)
 
 
 def main():

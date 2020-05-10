@@ -108,8 +108,11 @@ def main():
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
 
         glBindVertexArray(vao)
+        #glBindBuffer(GL_ARRAY_BUFFER, terrain.chunks[0, 0, 0].vbo)
+        #glDrawArrays(GL_TRIANGLES, 0, terrain.chunks[0][0][0].vertices.size)
 
         terrain.render(shader)
+        pygame.display.flip()
 
         debug = False
         if debug == True:
@@ -133,10 +136,8 @@ def main():
                     glGetActiveUniform(shader.id, i, bufSize, length, size, type, name)
                     print("Uniform #", i, " Type: ", type, " Name: ", name.decode("utf-8"))
 
-        pygame.display.flip()
-
         # fps counter
-        print("fps: ", 1000 / frametimer.getTime())
+        #print("fps: ", 1000 / frametimer.getTime())
         frametimer.reset()
 
 
