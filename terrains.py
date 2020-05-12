@@ -52,11 +52,6 @@ cubeLineIndicies = np.array([   [0, 1, 1, 5, 5, 4, 4, 0],     # left
 blockRGB = [ np.array([0.0, 0.0, 0.0, 0.0], dtype='f'), np.array([0.2, 1.0, 0.2, 1.0], dtype='f'), np.array([0.5, 0.5, 0.5, 1.0], dtype='f') ]
 
 
-class BLOCK(IntEnum):
-    AIR = 0
-    DIRT = 1
-    STONE = 2
-
 class FACE(IntEnum):
     LEFT = 0
     RIGHT = 1
@@ -64,6 +59,25 @@ class FACE(IntEnum):
     TOP = 3
     BACK = 4
     FRONT = 5
+    
+
+# STATIC BLOCK CONSTANTS
+BLOCK =  {
+
+            # BLOCK TYPE ID
+            ID : {      "AIR"   :   0,
+                        "DIRT"  :   1,
+                        "STONE" :   2
+            }
+
+            # BLOCK RGBA COLOUR
+            RGB : {     "AIR"   :   np.array([0.0, 0.0, 0.0, 0.0], dtype='f'),
+                        "DIRT"  :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
+                        "STONE" :   np.array([0.5, 0.5, 0.5, 1.0], dtype='f')
+            }
+
+}
+
 
 
 class block:

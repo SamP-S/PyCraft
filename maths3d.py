@@ -131,7 +131,7 @@ if False:
         return m
 
 
-def m4_projection(fov=45, aspect=(16/9), near=0.1, far=1000):
+def m4_perspective(fov=45, aspect=(16/9), near=0.1, far=1000):
     m = mat4()
     f = 1 / math.tan(math.radians(fov) / 2  )
     m.m[0,0] = f / aspect
