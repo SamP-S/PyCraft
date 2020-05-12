@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 from random import random
+from enum import IntEnum
+
+class NOISE(IntEnum):
+    PERLIN = 0
+    RANDOM = 1
 
 def perlin(x,y,seed=0):
     # permutation table

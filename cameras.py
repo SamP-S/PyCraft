@@ -31,7 +31,7 @@ class camera:
         self.right = maths3d.vec3(-1, 0, 0)
         self.up = maths3d.vec3(0, 1, 0)
 
-        self.proj = maths3d.m4_projection(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100)
+        self.proj = maths3d.m4_perspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100)
         self.view = maths3d.mat4()
 
 

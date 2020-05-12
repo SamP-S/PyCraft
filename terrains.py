@@ -48,10 +48,6 @@ cubeLineIndicies = np.array([   [0, 1, 1, 5, 5, 4, 4, 0],     # left
                                 [1, 2, 2, 6, 6, 5, 5, 1]],    # front
                                 dtype=np.uint32)
 
-
-blockRGB = [ np.array([0.0, 0.0, 0.0, 0.0], dtype='f'), np.array([0.2, 1.0, 0.2, 1.0], dtype='f'), np.array([0.5, 0.5, 0.5, 1.0], dtype='f') ]
-
-
 class FACE(IntEnum):
     LEFT = 0
     RIGHT = 1
@@ -59,25 +55,34 @@ class FACE(IntEnum):
     TOP = 3
     BACK = 4
     FRONT = 5
-    
+
+class ELEMENT_STATE(IntEnum):
+    GAS = 0
+    SOLID = 1
+    LIQUID = 2
+
 
 # STATIC BLOCK CONSTANTS
 BLOCK =  {
 
             # BLOCK TYPE ID
-            ID : {      "AIR"   :   0,
+            "ID" : {    "AIR"   :   0,
                         "DIRT"  :   1,
                         "STONE" :   2
-            }
+            },
 
             # BLOCK RGBA COLOUR
-            RGB : {     "AIR"   :   np.array([0.0, 0.0, 0.0, 0.0], dtype='f'),
+            "RGB" : {   "AIR"   :   np.array([0.0, 0.0, 0.0, 0.0], dtype='f'),
                         "DIRT"  :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
                         "STONE" :   np.array([0.5, 0.5, 0.5, 1.0], dtype='f')
+            },
+
+            "STATE" : { "AIR"   :   ELEMENT_STATE.GAS,
+                        "DIRT"  :   ELEMENT_STATE.SOLID,
+                        "STONE" :   ELEMENT_STATE.LIQUID
             }
 
 }
-
 
 
 class block:
@@ -127,11 +132,11 @@ class chunk:
                 offset = perlin[k][i] * CONST_AMPLITUE
                 for j in range(CONST_HEIGHT):
                     if j > 63 + offset:
-                        self.blocks[k][j][i] = block(BLOCK.AIR, maths3d.vec3(i, j, k))
+                        self.blocks[k][j][i] = block("AIR", maths3d.vec3(i, j, k))
                     elif j < 20:
-                        self.blocks[k][j][i] = block(BLOCK.STONE, maths3d.vec3(i, j, k))
+                        self.blocks[k][j][i] = block("STONE", maths3d.vec3(i, j, k))
                     else:
-                        self.blocks[k][j][i] = block(BLOCK.DIRT, maths3d.vec3(i, j, k))
+                        self.blocks[k][j][i] = block("DIRT", maths3d.vec3(i, j, k))
 
     def generateMesh(self):
         vertices = []
