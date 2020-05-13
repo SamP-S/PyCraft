@@ -65,21 +65,22 @@ class ELEMENT_STATE(IntEnum):
 # STATIC BLOCK CONSTANTS
 BLOCK =  {
 
-            # BLOCK TYPE ID
-            "ID" : {    "AIR"   :   0,
-                        "DIRT"  :   1,
-                        "STONE" :   2
+            "AIR"   :   {
+                        "ID"    :   0,
+                        "RGB"   :   np.array([0.0, 0.0, 0.0, 0.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.GAS
             },
 
-            # BLOCK RGBA COLOUR
-            "RGB" : {   "AIR"   :   np.array([0.0, 0.0, 0.0, 0.0], dtype='f'),
-                        "DIRT"  :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
-                        "STONE" :   np.array([0.5, 0.5, 0.5, 1.0], dtype='f')
+            "DIRT"  :   {
+                        "ID"    :   1,
+                        "RGB"   :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.SOLID
             },
 
-            "STATE" : { "AIR"   :   ELEMENT_STATE.GAS,
-                        "DIRT"  :   ELEMENT_STATE.SOLID,
-                        "STONE" :   ELEMENT_STATE.LIQUID
+            "STONE" :   {
+                        "ID"    :   2,
+                        "RGB"   :   np.array([0.5, 0.5, 0.5, 1.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.SOLID
             }
 
 }
@@ -141,48 +142,49 @@ class chunk:
     def generateMesh(self):
         vertices = []
         lines = []
+        air = "AIR"
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
                     # if solid -> check for visible mesh
-                    if self.blocks[k][j][i].type != 0:
+                    if self.blocks[k][j][i].type != air:
                         #t = timer.timer()
                         faces = []
 
                         # left face
                         if i == 0:
                             faces.append(FACE.LEFT)
-                        elif self.blocks[k][j][i - 1].type == 0:
+                        elif self.blocks[k][j][i - 1].type == air:
                             faces.append(FACE.LEFT)
 
                         # right face
                         if i == CONST_WIDTH - 1:
                             faces.append(FACE.RIGHT)
-                        elif self.blocks[k][j][i + 1].type == 0:
+                        elif self.blocks[k][j][i + 1].type == air:
                             faces.append(FACE.RIGHT)
 
                         # top face
                         if j == 0:
                             faces.append(FACE.BOTTOM)
-                        elif self.blocks[k][j - 1][i].type == 0:
+                        elif self.blocks[k][j - 1][i].type == air:
                             faces.append(FACE.BOTTOM)
 
                         # bottom face
                         if j == CONST_HEIGHT - 1:
                             faces.append(FACE.TOP)
-                        elif self.blocks[k][j + 1][i].type == 0:
+                        elif self.blocks[k][j + 1][i].type == air:
                             faces.append(FACE.TOP)
 
                         # back face
                         if k == 0:
                             faces.append(FACE.BACK)
-                        elif self.blocks[k - 1][j][i].type == 0:
+                        elif self.blocks[k - 1][j][i].type == air:
                             faces.append(FACE.BACK)
 
                         # front face
                         if k == CONST_DEPTH - 1:
                             faces.append(FACE.FRONT)
-                        elif self.blocks[k + 1][j][i].type == 0:
+                        elif self.blocks[k + 1][j][i].type == air:
                             faces.append(FACE.FRONT)
 
                         self.blocks[k][j][i].faces = faces
