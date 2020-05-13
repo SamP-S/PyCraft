@@ -10,13 +10,14 @@ from OpenGL.GLU import *
 from random import random
 
 # custom
-import terrains
+from terrains import *
 import input
 import cameras
-import timer
+from timer import *
 import noise
 import shaders
-import maths3d
+from maths3d import *
+
 
 WINDOW_WIDTH = 480
 WINDOW_HEIGHT = 360
@@ -93,7 +94,7 @@ def main():
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
 
     print("start")
-    frametimer = timer.timer()
+    frametimer = timer()
     while True:
         handleEvents()
         camera.process(keyboard, mouse)

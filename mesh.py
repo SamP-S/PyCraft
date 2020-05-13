@@ -1,5 +1,38 @@
 import numpy as np
 
+
+class MATERIALS(IntEnum):
+    SOLID_COLOUR = 0
+    TEXTURED = 1
+
+
+class material:
+
+    def __init__(self, type=MATERIALS.SOLID_COLOUR, texture=None):
+        self.type = type
+        self.colour = [0.8, 0.8, 0.8, 1.0]
+        self.texture = texture
+
+class texture:
+
+    def __init__(self, id=0):
+        self.id = id
+
+class geometry:
+
+    def __init__(self, vertices=None, indices=None):
+        self.vertices = vertices
+        self.indices = indices
+
+class mesh:
+
+    def __init__(self, geometry, material):
+        self.geometry = geometry
+        self.material = material
+
+
+
+
 # cube geometry data for blocks
 cubeVertices = np.array([   0.0, 0.0, 0.0,
                             0.0, 0.0, 1.0,

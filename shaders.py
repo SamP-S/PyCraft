@@ -28,7 +28,7 @@ class shader:
 
         self.attribs = [b"position"]
         self.locations = dict((k, v) for (v, k) in enumerate(self.attribs))
-        self.uniforms = [b"proj", b"view", b"modelChunk", b"modelBlock", b"colour"]
+        self.uniforms = [b"proj", b"view", b"model", b"colour"]
 
         vs = self.vertex()
         fs = self.fragment()
@@ -83,7 +83,7 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * modelChunk * modelBlock * vec4(position, 1.0);
+            gl_Position = proj * view * model * vec4(position, 1.0);
         }
         """
         return self.create(GL_VERTEX_SHADER, v)

@@ -11,7 +11,7 @@ class NOISE(IntEnum):
 
 def perlin(x,y,seed=0):
     # permutation table
-    np.random.seed(seed)
+    np.random.seed(0)
     p = np.arange(256,dtype=int)
     np.random.shuffle(p)
     p = np.stack([p,p]).flatten()
@@ -49,8 +49,9 @@ def gradient(h,x,y):
 
 def getPerlinIMG(seed):
     n = 16
-    range = 8
-    lin = np.linspace(0, range, n, endpoint=False)
+    min = 0
+    max = 8
+    lin = np.linspace(min, max, n, endpoint=False)
     x,y = np.meshgrid(lin,lin)
     return perlin(x, y, seed)
 
@@ -62,8 +63,9 @@ def getPerlinVal(i, j, seed):
 
 def main():
     n = 16
-    range = 8
-    lin = np.linspace(0, range, n, endpoint=False)
+    min = 0
+    max = 8
+    lin = np.linspace(0, max, n, endpoint=False)
     x,y = np.meshgrid(lin,lin)
     img = perlin(x,y,seed=2)
 

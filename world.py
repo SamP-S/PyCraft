@@ -1,5 +1,5 @@
-
 import noise
+from objects import *
 
 # the world is the root node of the "scene"
 # must contain additional data about the world:

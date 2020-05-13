@@ -7,9 +7,10 @@ from OpenGL.GLU import *
 from random import random
 from enum import IntEnum
 import numpy as np
-import math
+from math import *
 
-import maths3d
+from maths3d import *
+from objects import *
 import noise
 import timer
 import shaders
@@ -85,23 +86,23 @@ BLOCK =  {
 
 }
 
+BASE_CHUNK = chunk()
 
-class block:
 
-    def __init__(self, type=0, pos=maths3d.vec3()):
-        self.pos = pos
+class block(game_object):
+
+    def __init__(self, name="block", parent=None, transform=transform(), type="AIR"):
+        super().__init__(name, parent, transform)
         self.type = type
         self.faces = []
+        self.isSelected = False
 
 
-class chunk:
+class chunk(game_object):
 
-    def __init__(self, shader, x=0, y=0, z=0):
+    def __init__(self, name="chunk", parent=None, transform=transform()):
         #t = timer.timer()
-        self.pos = maths3d.vec3(x, y, z)
-        self.blocks = [[[0 for i in range(CONST_WIDTH)] for j in range(CONST_HEIGHT)] for k in range(CONST_DEPTH)]
-        self.vertices = np.array([], dtype=np.float32)
-        self.lineOffset = 0;
+        super().__init__(name, parent, transform)
         #print("properties: ", t.getTime())
         self.generate()
         #print("generate: ", t.getTime())
@@ -116,6 +117,7 @@ class chunk:
 
 
     def render(self, shader):
+
         model = maths3d.m4_translatev(self.pos)
         glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_FALSE, model.m)
 
@@ -129,15 +131,18 @@ class chunk:
     def generate(self):
         perlin = noise.getPerlinIMG(2)
         for k in range(CONST_DEPTH):
-            for i in range(CONST_WIDTH):
-                offset = perlin[k][i] * CONST_AMPLITUE
-                for j in range(CONST_HEIGHT):
+            for j in range(CONST_HEIGHT):
+                for i in range(CONST_WIDTH):
+                    offset = perlin[k][i] * CONST_AMPLITUDE
+
+                    pos = k * CONST_HEIGHT * CONST_WIDTH + j * CONST_WIDTH
                     if j > 63 + offset:
-                        self.blocks[k][j][i] = block("AIR", maths3d.vec3(i, j, k))
+                        self.children[pos] = block("BLOCK_AIR", self, transform(vec3(i, j, k)))
                     elif j < 20:
-                        self.blocks[k][j][i] = block("STONE", maths3d.vec3(i, j, k))
+                        self.children[pos] = block("BLOCK_STONE", self, transform(vec3(i, j, k)))
                     else:
-                        self.blocks[k][j][i] = block("DIRT", maths3d.vec3(i, j, k))
+                        self.children[pos] = block("BLOCK_DIRT", self, transform(vec3(i, j, k)))
+
 
     def generateMesh(self):
         vertices = []
