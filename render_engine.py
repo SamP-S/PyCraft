@@ -73,7 +73,7 @@ class shader:
         v = """
         #version 330
         layout(location = 0) in vec3 position;
-        layout(location = 1) in mat4 model;
+
 
         uniform mat4 view;
         uniform mat4 proj;
@@ -84,7 +84,7 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * model * vec4(position, 1.0);
+            gl_Position = proj * view * vec4(position, 1.0);
         }
         """
         return self.create(GL_VERTEX_SHADER, v)
@@ -133,10 +133,14 @@ class render_engine:
     def __init__(self):
         self.viewport = viewport()
         self.shader = shader()
+        glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
+        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().m)
+        glUniform4f(self.shader.locations[b"colour"], 1, 1, 1, 1)
 
         # list of loaded meshes
         self.vaos = []
         self.vbos = []
+        self.ebos = []
         self.meshes = []
         self.load_meshes()
         self.setup_meshes()
@@ -172,21 +176,26 @@ class render_engine:
             vao = GLuint(-1)
             glGenVertexArrays(1, vao)
             glBindVertexArray(vao)
+            for attrib in self.shader.attribs:
+                glEnableVertexAttribArray(self.shader.locations[attrib])
+
             # VBO
             vbo = glGenBuffers(1)
             glBindBuffer(GL_ARRAY_BUFFER, vbo)
             glBufferData(GL_ARRAY_BUFFER, self.meshes[i].geometry.vertices, GL_STATIC_DRAW)
+
             # EBO
             ebo = glGenBuffers(1)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.meshes[i].geometry.indices, GL_STATIC_DRAW)
+
+            # position attribute
+            glVertexAttribPointer(self.shader.locations[b"position"], 3, GL_FLOAT, GL_FALSE, 0, None)
+
             # Add to lists
             self.vaos.append(vao)
             self.vbos.append(vbo)
             self.ebos.append(ebo)
-
-        for vao in self.vaos:
-            print(vao)
 
 
     def process_node(node, transform):
@@ -214,12 +223,12 @@ class render_engine:
             render_node(child, worldTransform)
 
     # pass in world tree with all gameobjects ("scene")
-    def render(world):
+    def render(self, world):
         # use shader program
         self.shader.use()
         # perspective projection
         glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
-        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().m)
+        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().translate(0, 0, -5))
 
         self.drawlists = [ [] for i in range(len(meshes)) ]
         # tree traversal algorithm
@@ -231,12 +240,31 @@ class render_engine:
             modelArr = self.drawlists[i][0]
             colourArr = self.drawlists[i][1]
             # model transform
-            modelVBO = glGenBuffers(1)
-            glBufferData(GL_ARRAY_BUFFER, modelVBO)
-            glBufferData(GL_ARRAY_BUFFER, modelArr, GL_DYNAMIC_DRAW)
+
+import pygame
+from pygame.locals import *
 
 def main():
+
+    pygame.init()
+    window = pygame.display
+    pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), DOUBLEBUF|OPENGL)
+    pygame.display.set_caption("Render Engine")
     renderer = render_engine()
+
+    pos = vec3(0, 0, -5)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        renderer.shader.use()
+        glUniformMatrix4fv(renderer.shader.locations[b"view"], 1, GL_FALSE, m4_translatev(pos).m)
+        glBindVertexArray(renderer.vaos[0])
+        glDrawElements(GL_TRIANGLES, renderer.meshes[0].geometry.indices.size, GL_UNSIGNED_INT, None)
+        pygame.display.flip()
+
 
 if __name__ == "__main__":
     main()

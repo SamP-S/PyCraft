@@ -10,7 +10,7 @@ from OpenGL.GLU import *
 from random import random
 
 # custom
-from terrains import *
+from terrain import *
 import input
 import cameras
 from timer import *
