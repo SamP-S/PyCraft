@@ -103,8 +103,6 @@ def main():
 
         glUniformMatrix4fv(shader.locations[b"proj"], 1, uniform_transpose, maths3d.m4_perspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000).m)
         glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, camera.view.m)
-        glUniformMatrix4fv(shader.locations[b"modelBlock"], 1, uniform_transpose, maths3d.mat4().m)
-        glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, uniform_transpose, maths3d.mat4().m)
 
         glBindVertexArray(vao)
 

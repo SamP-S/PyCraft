@@ -1,11 +1,5 @@
 from maths3d import *
-from mesh import *
-
-WINDOW_WIDTH = 480
-WINDOW_HEIGHT = 360
-FOV = 45
-Z_NEAR = 0.1
-Z_FAR = 100
+import mesh
 
 from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
@@ -13,6 +7,14 @@ from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVerte
 from OpenGL.GLU import *
 
 import numpy as np
+from enum import IntEnum
+
+WINDOW_WIDTH = 480
+WINDOW_HEIGHT = 360
+FOV = 45
+Z_NEAR = 0.1
+Z_FAR = 100
+
 
 def glErrorCheck():
     err = glGetError()
@@ -30,19 +32,6 @@ def glLinkErrorCheck(program):
     if err != GL_TRUE:
         log = glGetProgramInfoLog(program)
         print(log)
-
-
-class instance_mesh:
-
-    def __init__(self, mesh=None):
-        self.mesh = mesh
-
-        self.vbo = glGenBuffers(1)
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glBufferData(GL_ARRAY_BUFFER, self.mesh.geometry.vertices, GL_STATIC_DRAW)
-        self.ebo = glGenBuffers(1)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.mesh.geometry.indices, GL_STATIC_DRAW)
 
 
 class shader:
@@ -84,14 +73,10 @@ class shader:
         v = """
         #version 330
         layout(location = 0) in vec3 position;
+        layout(location = 1) in mat4 model;
 
-        uniform mat4 modelChunk;
-        uniform mat4 modelBlock;
         uniform mat4 view;
         uniform mat4 proj;
-
-        uniform mat4 cameraModel;
-
         uniform vec4 colour;
 
         out vec4 solidColour;
@@ -99,7 +84,7 @@ class shader:
         void main()
         {
             solidColour = colour;
-            gl_Position = proj * view * modelChunk * modelBlock * vec4(position, 1.0);
+            gl_Position = proj * view * model * vec4(position, 1.0);
         }
         """
         return self.create(GL_VERTEX_SHADER, v)
@@ -117,13 +102,11 @@ class shader:
         return self.create(GL_FRAGMENT_SHADER, f)
 
 
-
 class size:
 
     def __init__(self, width=-1, height=-1):
         self.width = width
         self.height = height
-
 
 class viewport:
 
@@ -133,34 +116,78 @@ class viewport:
     def __init__(self, fov=45, resolution=size(WINDOW_WIDTH, WINDOW_HEIGHT)):
         self.fov = fov
         self.resolution = resolution
-        w = self.viewport.resolution.width
-        h = self.viewport.resolution.height
+        w = self.resolution.width
+        h = self.resolution.height
         aspect = w / h
         self.projection = m4_perspective(self.fov, aspect, self.Z_NEAR, self.Z_FAR)
 
 
 class render_engine:
 
+    # make vao
+    # bind vao
+    # bind vbo
+    # enable attrbutes
+    # set attribute pointers
+
     def __init__(self):
         self.viewport = viewport()
         self.shader = shader()
 
         # list of loaded meshes
+        self.vaos = []
+        self.vbos = []
         self.meshes = []
         self.load_meshes()
+        self.setup_meshes()
+
 
         # list of all cameras
         self.cameras = []
 
         # list of lists of each mesh instance by mesh
-        self.drawlists = [ [[], []] for i in range(len(meshes)) ]
+        self.drawlists = [ [[], []] for i in range(len(self.meshes)) ]
 
-    def load_meshes():
+    def load_meshes(self):
         print("load meshes")
         # for each mesh in mesh folder
         # load geometry
         # load material
         # add to list
+
+        # hardcoded for now
+        cubeGeometry = mesh.geometry(mesh.cubeVertices, mesh.cubeIndices)
+        cubeMaterial = mesh.material()
+        cubeMesh = mesh.mesh(cubeGeometry, cubeMaterial)
+        self.meshes.append(cubeMesh)
+
+        playerGeometry = mesh.geometry(mesh.playerVertices, mesh.playerIndices)
+        playerMaterial = mesh.material()
+        playerMesh = mesh.mesh(playerGeometry, playerMaterial)
+        self.meshes.append(playerMesh)
+
+    def setup_meshes(self):
+        for i in range(len(self.meshes)):
+            # VAO
+            vao = GLuint(-1)
+            glGenVertexArrays(1, vao)
+            glBindVertexArray(vao)
+            # VBO
+            vbo = glGenBuffers(1)
+            glBindBuffer(GL_ARRAY_BUFFER, vbo)
+            glBufferData(GL_ARRAY_BUFFER, self.meshes[i].geometry.vertices, GL_STATIC_DRAW)
+            # EBO
+            ebo = glGenBuffers(1)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.meshes[i].geometry.indices, GL_STATIC_DRAW)
+            # Add to lists
+            self.vaos.append(vao)
+            self.vbos.append(vbo)
+            self.ebos.append(ebo)
+
+        for vao in self.vaos:
+            print(vao)
+
 
     def process_node(node, transform):
         worldPos = v3_add(transform.position, self.transform.position)
@@ -191,8 +218,8 @@ class render_engine:
         # use shader program
         self.shader.use()
         # perspective projection
-        glUniformMatrix4fv(shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
-        glUniformMatrix4fv(shader.locations[b"view"], 1, GL_FALSE, mat4().m)
+        glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
+        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().m)
 
         self.drawlists = [ [] for i in range(len(meshes)) ]
         # tree traversal algorithm
@@ -201,3 +228,15 @@ class render_engine:
             process_node(child)
 
         for i in range(len(self.drawlists)):
+            modelArr = self.drawlists[i][0]
+            colourArr = self.drawlists[i][1]
+            # model transform
+            modelVBO = glGenBuffers(1)
+            glBufferData(GL_ARRAY_BUFFER, modelVBO)
+            glBufferData(GL_ARRAY_BUFFER, modelArr, GL_DYNAMIC_DRAW)
+
+def main():
+    renderer = render_engine()
+
+if __name__ == "__main__":
+    main()

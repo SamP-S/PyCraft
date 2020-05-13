@@ -11,7 +11,7 @@ from math import *
 
 from maths3d import *
 from objects import *
-import noise
+from noise import *
 import timer
 import shaders
 
@@ -113,20 +113,15 @@ class chunk(game_object):
         self.vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, self.vertices, GL_STATIC_DRAW)
-        #print("gl: ", t.getTime())
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
 
 
     def render(self, shader):
-
-        model = maths3d.m4_translatev(self.pos)
-        glUniformMatrix4fv(shader.locations[b"modelChunk"], 1, GL_FALSE, model.m)
 
         glUniform4f(shader.locations[b"colour"], 1, 1, 1, 1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glDrawArrays(GL_TRIANGLES, 0, self.lineOffset)
 
-        glUniform4f(shader.locations[b"colour"], 0, 0, 0, 1)
-        glDrawArrays(GL_LINES, self.lineOffset, self.lineSize)
 
     def generate(self):
         perlin = noise.getPerlinIMG(2)
@@ -224,11 +219,11 @@ class chunk(game_object):
                     print(self.blocks[k][j][i])
 
 
-class terrain:
+class terrain(game_object):
 
     MAX_RANGE = 1
 
-    def __init__(self, shader):
+    def __init__(self, name="terrain", parent=None, seed=0, noise=NOISE.PERLIN):
          # make dynamic chunk position
          self.chunks = []
          t = timer.timer()
@@ -263,8 +258,6 @@ class terrain:
             for i in range(min_chunk_x, max_chunk_x + 1):
                 if arr[k][i] != True:
                     self.chunks.append(chunk(shader, i * CONST_WIDTH, 0, k * CONST_DEPTH))
-
-        #self.chunks = [[[chunk(shader, i * CONST_WIDTH, j * CONST_HEIGHT, k * CONST_DEPTH) for i in range(self.MAX_X)] for j in range(self.MAX_Y)] for k in range(self.MAX_Z)]
 
 
     def render(self, shader):
