@@ -12,8 +12,7 @@ class vec3:
 class mat4:
 
     def __init__(self):
-        self.array = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-        self.m = np.asmatrix(self.array, dtype='f')
+        self.m = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], dtype=np.float32)
 
 
 # vec3 functions
