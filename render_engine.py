@@ -1,5 +1,5 @@
 from maths3d import *
-import mesh
+import models
 
 from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
@@ -145,49 +145,49 @@ class render_engine:
         print("array")
         print(np.append(m4_translate(0, 0, 0).m, m4_translate(0, 0, 0).m))
 
-        self.modelArr = np.append(m4_translate(0, 0, 0).m, m4_translate(-1, -1, 0).m)
+        self.transformArr = np.append(m4_translate(0, 0, 0).m, m4_translate(-1, -1, 0).m)
         self.colourArr = np.append(np.array([1, 1, 1, 1], dtype=np.float32), np.array([1, 0, 0, 1], dtype=np.float32))
 
-        # list of loaded meshes
+        # list of loaded models
         self.vaos = []
         self.vbos = []
         self.ebos = []
-        self.meshes = []
-        self.load_meshes()
-        self.setup_meshes()
+        self.models = []
+        self.load_models()
+        self.setup_models()
 
         # list of all cameras
         self.cameras = []
 
         # list of lists of each mesh instance by mesh
-        self.drawlists = [ [[], []] for i in range(len(self.meshes)) ]
+        self.drawlists = [ [[], []] for i in range(len(self.models)) ]
 
         self.pos = vec3(0, 0, -3)
 
-    def load_meshes(self):
-        print("load meshes")
-        # for each mesh in mesh folder
-        # load geometry
+    def load_models(self):
+        print("load models")
+        # for each model in model folder
+        # load mesh
         # load material
         # add to list
 
 
         # hardcoded for now
-        cubeGeometry = mesh.geometry(mesh.cubeVertices, mesh.cubeIndices)
-        cubeMaterial = mesh.material()
-        cubeMesh = mesh.mesh(cubeGeometry, cubeMaterial)
-        self.meshes.append(cubeMesh)
+        cubeMesh = models.mesh(models.cubeVertices, models.cubeIndices)
+        cubeMaterial = models.material()
+        cubeModel = models.model(cubeMesh, cubeMaterial)
+        self.models.append(cubeModel)
         # seems to fuck with the setup
         return
 
-        playerGeometry = mesh.geometry(mesh.playerVertices, mesh.playerIndices)
-        playerMaterial = mesh.material()
-        playerMesh = mesh.mesh(playerGeometry, playerMaterial)
-        self.meshes.append(playerMesh)
+        playerMesh = models.mesh(models.playerVertices, models.playerIndices)
+        playerMaterial = models.material()
+        playerModel = models.model(playerMesh, playerMaterial)
+        self.models.append(playerModel)
 
-    def setup_meshes(self):
-        print("setup meshes")
-        for i in range(len(self.meshes)):
+    def setup_models(self):
+        print("setup models")
+        for i in range(len(self.models)):
             # VAO
             vao = GLuint(-1)
             glGenVertexArrays(1, vao)
@@ -198,12 +198,12 @@ class render_engine:
             # VBO
             vbo = glGenBuffers(1)
             glBindBuffer(GL_ARRAY_BUFFER, vbo)
-            glBufferData(GL_ARRAY_BUFFER, self.meshes[i].geometry.vertices, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, self.models[i].mesh.vertices, GL_STATIC_DRAW)
             # EBO
             ebo = glGenBuffers(1)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.meshes[i].geometry.indices, GL_STATIC_DRAW)
-            print(self.meshes[i].geometry.indices)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.models[i].mesh.indices, GL_STATIC_DRAW)
+            print(self.models[i].mesh.indices)
             # position attribute
             glVertexAttribPointer(self.shader.locations[b"position"], 3, GL_FLOAT, GL_FALSE, 0, None)
 
@@ -234,21 +234,21 @@ class render_engine:
                 # vbo for model transformations
                 modelVBO = glGenBuffers(1)
                 glBindBuffer(GL_ARRAY_BUFFER, modelVBO)
-                glBufferData(GL_ARRAY_BUFFER, self.modelArr, GL_STATIC_DRAW)
-                print(self.modelArr)
+                glBufferData(GL_ARRAY_BUFFER, self.transformArr, GL_STATIC_DRAW)
+                print(self.transformArr)
 
                 # model projection instance attribute
                 modelLoc = self.shader.locations[b"model"]
                 glBindBuffer(GL_ARRAY_BUFFER, modelVBO)
 
                 glEnableVertexAttribArray(modelLoc    )
-                glVertexAttribPointer(modelLoc    , 4, GL_FLOAT, GL_FALSE, self.modelArr.itemsize * 16, ctypes.c_void_p(0))
+                glVertexAttribPointer(modelLoc    , 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(0))
                 glEnableVertexAttribArray(modelLoc + 1)
-                glVertexAttribPointer(modelLoc + 1, 4, GL_FLOAT, GL_FALSE, self.modelArr.itemsize * 16, ctypes.c_void_p(self.modelArr.itemsize * 4))
+                glVertexAttribPointer(modelLoc + 1, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 4))
                 glEnableVertexAttribArray(modelLoc + 2)
-                glVertexAttribPointer(modelLoc + 2, 4, GL_FLOAT, GL_FALSE, self.modelArr.itemsize * 16, ctypes.c_void_p(self.modelArr.itemsize * 8))
+                glVertexAttribPointer(modelLoc + 2, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 8))
                 glEnableVertexAttribArray(modelLoc + 3)
-                glVertexAttribPointer(modelLoc + 3, 4, GL_FLOAT, GL_FALSE, self.modelArr.itemsize * 16, ctypes.c_void_p(self.modelArr.itemsize * 12))
+                glVertexAttribPointer(modelLoc + 3, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 12))
 
                 glVertexAttribDivisor(modelLoc    , 1);
                 glVertexAttribDivisor(modelLoc + 1, 1);
@@ -273,12 +273,12 @@ class render_engine:
         # if game object has a mesh component
         if node.mesh != None:
             # iterate through loaded mesh
-            for i in range(len(self.meshes)):
+            for i in range(len(self.models)):
                 # if equal
-                if node.mesh == self.meshes[i]:
+                if node.model.mesh == self.models[i].mesh:
                     # add an instance to the mesh's draw list
                     self.drawlists[i][0].append(node.transform.getModel())
-                    self.drawlists[i][1].append(node.mesh.material.colour)
+                    self.drawlists[i][1].append(node.model.material.colour)
 
         # process node's children
         for child in node.chilren:
@@ -288,8 +288,7 @@ class render_engine:
         self.shader.use()
         glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, m4_translatev(self.pos).m)
         glBindVertexArray(self.vaos[0])
-        glDrawElementsInstanced(GL_TRIANGLES, self.meshes[0].geometry.indices.size, GL_UNSIGNED_INT, None, 2)
-        #glDrawElements(GL_TRIANGLES, self.meshes[0].geometry.indices.size, GL_UNSIGNED_INT, None)
+        glDrawElementsInstanced(GL_TRIANGLES, self.models[0].mesh.indices.size, GL_UNSIGNED_INT, None, 2)
 
     # pass in world tree with all gameobjects ("scene")
     def render(self, world):
@@ -299,14 +298,14 @@ class render_engine:
         glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
         glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().translate(0, 0, -5))
 
-        self.drawlists = [ [] for i in range(len(meshes)) ]
+        self.drawlists = [ [] for i in range(len(models)) ]
         # tree traversal algorithm
         # render all game objects with mesh components
         for child in world.children:
             process_node(child)
 
         for i in range(len(self.drawlists)):
-            modelArr = self.drawlists[i][0]
+            transformArr = self.drawlists[i][0]
             colourArr = self.drawlists[i][1]
             # model transform
 
@@ -336,11 +335,11 @@ def main():
 
         if frame == 100:
             renderer.colourArr = np.append(np.array([0, 1, 1, 1], dtype=np.float32), np.array([1, 1, 0, 1], dtype=np.float32))
-            renderer.modelArr = np.append(m4_translate(-1, 0, 0).m, m4_translate(0, -1, 0).m)
+            renderer.transformArr = np.append(m4_translate(-1, 0, 0).m, m4_translate(0, -1, 0).m)
             glBindBuffer(GL_ARRAY_BUFFER, renderer.vbos[1])
             glBufferData(GL_ARRAY_BUFFER, renderer.colourArr, GL_STATIC_DRAW)
             glBindBuffer(GL_ARRAY_BUFFER, renderer.vbos[2])
-            glBufferData(GL_ARRAY_BUFFER, renderer.modelArr, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, renderer.transformArr, GL_STATIC_DRAW)
             print("buffer data changed")
 
 

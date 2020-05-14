@@ -19,16 +19,16 @@ class texture:
     def __init__(self, id=0):
         self.id = id
 
-class geometry:
+class mesh:
 
     def __init__(self, vertices=None, indices=None):
         self.vertices = vertices
         self.indices = indices
 
-class mesh:
+class model:
 
-    def __init__(self, geometry, material):
-        self.geometry = geometry
+    def __init__(self, mesh, material):
+        self.mesh = mesh
         self.material = material
 
 

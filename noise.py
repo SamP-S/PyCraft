@@ -64,7 +64,7 @@ def getPerlinVal(i, j, seed):
 def main():
     n = 16
     min = 0
-    max = 8
+    max = min + 2
     lin = np.linspace(0, max, n, endpoint=False)
     x,y = np.meshgrid(lin,lin)
     img = perlin(x,y,seed=2)
