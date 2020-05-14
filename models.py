@@ -9,25 +9,29 @@ class MATERIALS(IntEnum):
 
 class material:
 
-    def __init__(self, type=MATERIALS.SOLID_COLOUR, texture=None):
+    def __init__(self, name="material" type=MATERIALS.SOLID_COLOUR, texture=None):
+        self.name = name
         self.type = type
         self.colour = [0.8, 0.8, 0.8, 1.0]
         self.texture = texture
 
 class texture:
 
-    def __init__(self, id=0):
+    def __init__(self, name="texture", id=0):
+        self.name = name
         self.id = id
 
 class mesh:
 
-    def __init__(self, vertices=None, indices=None):
+    def __init__(self, name="mesh", vertices=None, indices=None):
+        self.name = name
         self.vertices = vertices
         self.indices = indices
 
 class model:
 
-    def __init__(self, mesh, material):
+    def __init__(self, name="model" mesh, material):
+        self.name = name
         self.mesh = mesh
         self.material = material
 
