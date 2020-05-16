@@ -22,6 +22,17 @@ class transform:
 
 class game_object(object):
 
-    def __init__(self, name="game_object", parent=None, transform=transform()):
+    def __init__(self, name="game_object", parent=None, transform=transform(), scripts=[]):
         super().__init__(name, parent)
         self.transform = transform
+        self.scripts = scripts
+        self.model = None
+        self.start()
+
+    def start(self):
+        for script in self.scripts:
+            script.start()
+
+    def update(self):
+        for script in self.scripts:
+            script.update()

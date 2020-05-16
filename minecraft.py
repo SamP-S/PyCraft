@@ -55,20 +55,6 @@ def main():
     print("minecraft")
     glWindow()
 
-#########################################
-    depricated = False
-    if depricated == True:
-        cubeVertices = ((1,1,1),(1,1,-1),(1,-1,-1),(1,-1,1),(-1,1,1),(-1,-1,-1),(-1,-1,1),(-1,1,-1))
-        cubeQuads = ((0,3,6,4),(2,5,6,3),(1,2,5,7),(1,0,4,7),(7,4,6,5),(2,3,0,1))
-        glBegin(GL_QUADS)
-        for cubeQuad in cubeQuads:
-            for cubeVertex in cubeQuad:
-                glVertex3fv(cubeVertices[cubeVertex])
-        glEnd()
-        pygame.display.flip()
-        return
-#########################################
-
     uniform_transpose = GL_FALSE
     shader = shaders.shader()
     terrain = terrains.terrain(shader)
@@ -105,31 +91,9 @@ def main():
         glUniformMatrix4fv(shader.locations[b"view"], 1, uniform_transpose, camera.view.m)
 
         glBindVertexArray(vao)
-
         terrain.render(shader)
+
         pygame.display.flip()
-
-        debug = False
-        if debug == True:
-            # attribute validation
-            bufSize = 256
-            length = (GLint * 1)()
-            size = (GLint * 1)()
-            type = GLuint(0)
-            name = bytearray(bufSize)
-
-            countAttrib = glGetProgramiv(shader.id, GL_ACTIVE_ATTRIBUTES)
-            print("Active Attributes: ", countAttrib)
-            for i in range(countAttrib):
-                glGetActiveAttrib(shader.id, GLuint(i), bufSize, length, size, type, name)
-                print("Attribute #", i, " Type: ", type, " Name: ", name.decode("utf-8"))
-
-                # uniform validation
-                countUniforms = glGetProgramiv(shader.id, GL_ACTIVE_UNIFORMS)
-                print("Active Uniforms: ", countUniforms)
-                for i in range(countUniforms):
-                    glGetActiveUniform(shader.id, i, bufSize, length, size, type, name)
-                    print("Uniform #", i, " Type: ", type, " Name: ", name.decode("utf-8"))
 
         # fps counter
         #print("fps: ", 1000 / frametimer.getTime())

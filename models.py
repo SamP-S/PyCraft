@@ -9,7 +9,7 @@ class MATERIALS(IntEnum):
 
 class material:
 
-    def __init__(self, name="material" type=MATERIALS.SOLID_COLOUR, texture=None):
+    def __init__(self, name="material", type=MATERIALS.SOLID_COLOUR, texture=None):
         self.name = name
         self.type = type
         self.colour = [0.8, 0.8, 0.8, 1.0]
@@ -30,7 +30,7 @@ class mesh:
 
 class model:
 
-    def __init__(self, name="model" mesh, material):
+    def __init__(self, name="model", mesh=None, material=None):
         self.name = name
         self.mesh = mesh
         self.material = material

@@ -261,16 +261,8 @@ class terrain(game_object):
 
 
     def render(self, shader):
-        # calls render
-        #glBindBuffer(GL_ARRAY_BUFFER, cubeVBO)
-
         for i in range(len(self.chunks)):
             self.chunks[i].render(shader)
-
-        # moved into chunk render routine
-        #print(self.chunks[k][j][i].vbo)
-        #glBindBuffer(GL_ARRAY_BUFFER, self.chunks[k][j][i].vbo)
-        #glDrawArrays(GL_TRIANGLES, 0, self.chunks[k][j][i].vertices.size)
 
 
 def main():

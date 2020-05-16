@@ -6,8 +6,9 @@ from random import random
 from enum import IntEnum
 
 class NOISE(IntEnum):
-    PERLIN = 0
-    RANDOM = 1
+    NONE = 0
+    PERLIN = 1
+    RANDOM = 2
 
 def perlin(x,y,seed=0):
     # permutation table
