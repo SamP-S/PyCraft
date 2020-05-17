@@ -1,7 +1,8 @@
 import noise
 import input
 from objects import *
-from terrain import *
+from terrain_2 import *
+from cameras import *
 
 # the world is the root node of the "scene"
 # must contain additional data about the world:
@@ -11,14 +12,16 @@ from terrain import *
 global mouse
 global keyboard
 mouse = input.mouse()
-keyboard = keyboard.mouse()
+keyboard = input.keyboard()
 
 class world:
 
-    def __init__(self, seed=2, noise=noise.NOISE.PERLIN):
+    def __init__(self):
         print("init world")
         self.children = []
 
-        # add terrain
-        self.children.append(terrain(seed, noise))
-        self.children.append()
+        self.camera = camera()
+
+        #TESTING
+        # add chunk
+        self.children.append(chunk(0))

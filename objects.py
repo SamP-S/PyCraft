@@ -1,9 +1,22 @@
 from maths3d import *
 
 
+class script:
+
+    def __init__(self, parent=None):
+        self.parent = parent
+
+    def start(self):
+        None
+
+    def update(self):
+        None
+
+
 class object:
 
-    def __init__(self, name="object", parent=None):
+    def __init__(self, id=-1, name="object", parent=None):
+        self.id = id
         self.name = name
         self.parent = parent
         self.children = []
@@ -22,11 +35,13 @@ class transform:
 
 class game_object(object):
 
-    def __init__(self, name="game_object", parent=None, transform=transform(), scripts=[]):
-        super().__init__(name, parent)
+    def __init__(self, id=-1, name="game_object", parent=None, transform=transform(), scripts=[]):
+        super().__init__(id, name, parent)
         self.transform = transform
         self.scripts = scripts
-        self.model = None
+        self.mesh = None
+        self.material = None
+        self.camera = None
         self.start()
 
     def start(self):

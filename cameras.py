@@ -21,7 +21,7 @@ class camera:
     # Camera by default looks towards -z direction
 
     def __init__(self):
-        self.pos = .vec3(0, 70, 0)
+        self.pos = vec3(0, 10, 0)
         self.vAngle = 0
         self.hAngle = 0
         self.timer = timer.timer()

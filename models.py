@@ -3,39 +3,42 @@ from enum import IntEnum
 
 
 class MATERIALS(IntEnum):
-    SOLID_COLOUR = 0
-    TEXTURED = 1
+    NONE = 0
+    SOLID_COLOUR = 1
+    TEXTURED = 2
 
 
 class material:
 
-    def __init__(self, name="material", type=MATERIALS.SOLID_COLOUR, texture=None):
+    def __init__(self, id=-1, name="material", type=MATERIALS.NONE):
+        self.id = -1
         self.name = name
         self.type = type
-        self.colour = [0.8, 0.8, 0.8, 1.0]
-        self.texture = texture
 
-class texture:
+class solid_material(material):
 
-    def __init__(self, name="texture", id=0):
-        self.name = name
-        self.id = id
+    def __init__(self, id=-1, name="solid colour material", type=MATERIALS.SOLID_COLOUR, colour=[0.8, 0.8, 0.8, 1.0]):
+        super().__init__(id, name, type)
+        self.colour = colour
 
 class mesh:
 
-    def __init__(self, name="mesh", vertices=None, indices=None):
+    def __init__(self, id=-1, name="mesh", vertices=None, indices=None):
+        self.id = id
         self.name = name
         self.vertices = vertices
         self.indices = indices
 
 class model:
 
-    def __init__(self, name="model", mesh=None, material=None):
+    def __init__(self, id=-1, name="model", mesh_id=None, material_id=None):
+        self.id = id
         self.name = name
-        self.mesh = mesh
-        self.material = material
+        self.mesh_id = mesh_id
+        self.material_id = material_id
 
 
+################################################################################
 
 
 # cube geometry data for blocks
