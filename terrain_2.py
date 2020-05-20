@@ -61,27 +61,6 @@ BLOCK_DIC =  {
 
 }
 
-BLOCK_DIC_AGAIN = {
-            "AIR"   :   {
-                        "ID"    :   0,
-                        "RGB"   :   np.array([1.0, 1.0, 1.0, 0.0], dtype='f'),
-                        "STATE" :   ELEMENT_STATE.GAS
-            },
-
-            "DIRT"  :   {
-                        "ID"    :   1,
-                        "RGB"   :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
-                        "STATE" :   ELEMENT_STATE.SOLID
-            },
-
-            "STONE" :   {
-                        "ID"    :   2,
-                        "RGB"   :   np.array([0.5, 0.5, 0.5, 1.0], dtype='f'),
-                        "STATE" :   ELEMENT_STATE.SOLID
-            }
-
-}
-
 
 # basic data structure to contain data about changes of blocks
 # these will be stored in file and loaded upon chunk load
@@ -127,11 +106,14 @@ class chunk(game_object):
         self.mesh = models.mesh(id, "chunk_mesh", 0, models.RENDER.ELEMENTS_INSTANCED)
         self.generate()
         self.generate_instances()
-        print("mesh data id: ", self.mesh.data)
-        print("colours: ", self.mesh.instances.colours)
-        print("colours size: ", self.mesh.instances.colours.size)
-        print("transforms: ", self.mesh.instances.model_projections)
-        print("transforms size: ", self.mesh.instances.model_projections.size)
+
+        # print debug info
+        if False:
+            print("mesh data id: ", self.mesh.data)
+            print("colours: ", self.mesh.instances.colours)
+            print("colours size: ", self.mesh.instances.colours.size)
+            print("transforms: ", self.mesh.instances.model_projections)
+            print("transforms size: ", self.mesh.instances.model_projections.size)
 
 
     def generate(self):
@@ -165,6 +147,7 @@ class chunk(game_object):
                         else:
                             self.blocks[k][j][i] = BLOCK.AIR
 
+
     def change_block(self, new_type=BLOCK.AIR, x=-1, y=-1, z=-1):
         # write change log
         self.logs.append(log(vec3(x, y, z), self.blocks[z][y][x], new_type))
@@ -176,37 +159,26 @@ class chunk(game_object):
         instances = self.mesh.instances
 
         if new_type == BLOCK.AIR:
-            # get first index of 1D-array
+            # get first index of 1D-array of game object id
             index = np.where(instances.game_object_ids == pos)[0][0]
+
             # position
-            print("pos: ", pos)
-            print("index: ", index)
-            print(instances.game_object_ids)
             instances.game_object_ids = np.delete(instances.game_object_ids, index)
-            print(instances.game_object_ids)
-            print()
 
             # colour
             colour_index = index * 4
             colour_list = []
             for i in range(4):
                 colour_list.append(colour_index + i)
-            print("index: ", colour_index)
-            print("list: ", colour_list)
-            print(instances.colours)
             instances.colours = np.delete(instances.colours, colour_list)
-            print(instances.colours)
 
             # transformation
             model_index = index * 16
             model_list = []
             for i in range(16):
                 model_list.append(model_index + i)
-            print("index: ", model_index)
-            print("list: ", model_list)
-            print(instances.model_projections)
             instances.model_projections = np.delete(instances.model_projections, model_list)
-            print(instances.model_projections)
+
             # count
             instances.count -= 1
 
@@ -214,9 +186,10 @@ class chunk(game_object):
             print("i didn't know this was possible")
             print("so i haven't coded it sowwy :(")
         elif new_type != BLOCK.AIR and old_type == BLOCK.AIR:
+            # get instance data
             colour = BLOCK_DIC[new_type].get("RGB")
             proj = transform(vec3(x, y, z)).getModel()
-
+            # append to instance arrays
             instances.game_object_ids = np.append(instances.game_object_ids, pos)
             instances.colours = np.append(instances.colours, colour)
             instances.model_projections = np.append(instances.model_projections, proj)
@@ -224,59 +197,6 @@ class chunk(game_object):
 
         self.blocks[z][y][x] = new_type
 
-    def generate_children(self):
-        air = BLOCK.AIR
-        count = 0
-        for k in range(CONST_DEPTH):
-            for j in range(CONST_HEIGHT):
-                for i in range(CONST_WIDTH):
-
-                    if self.blocks[k][j][i] == None:
-                        print("NONE")
-                        count += 1
-                        continue
-                    # if solid -> check for visible mesh]
-                    if self.blocks[k][j][i] != air:
-                        isVisible = False
-                        # left face
-                        if i == 0:
-                            isVisible = True
-                        elif self.blocks[k][j][i - 1] == air:
-                            isVisible = True
-
-                        # right face
-                        if i == CONST_WIDTH - 1:
-                            isVisible = True
-                        elif self.blocks[k][j][i + 1] == air:
-                            isVisible = True
-
-                        # top face
-                        if j == 0:
-                            isVisible = True
-                        elif self.blocks[k][j - 1][i] == air:
-                            isVisible = True
-
-                        # bottom face
-                        if j == CONST_HEIGHT - 1:
-                            isVisible = True
-                        elif self.blocks[k][j + 1][i] == air:
-                            isVisible = True
-
-                        # back face
-                        if k == 0:
-                            isVisible = True
-                        elif self.blocks[k - 1][j][i] == air:
-                            isVisible = True
-
-                        # front face
-                        if k == CONST_DEPTH - 1:
-                            isVisible = True
-                        elif self.blocks[k + 1][j][i] == air:
-                            isVisible = True
-
-                        if isVisible:
-                            print("block x", i, "y", j, "z", k)
-                            self.children.append(block(len(self.children), "block", self, transform(vec3(i, j, k)), "DIRT"))
 
     # only to be called once upon chunk creation/generation
     def generate_instances(self):
@@ -364,3 +284,68 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+################################################################################
+# DEPRECATED
+
+if False:
+
+    # old generation algorithmn used to generate an array of children from 3d block array
+    # removed as it required per frame processing on graphics side which was very slow
+    # replaced by instance object in mesh and processing data for graphics directly
+    # in chunk instead of in graphics so it only has to be done once
+    def generate_children(self):
+        air = BLOCK.AIR
+        count = 0
+        for k in range(CONST_DEPTH):
+            for j in range(CONST_HEIGHT):
+                for i in range(CONST_WIDTH):
+
+                    if self.blocks[k][j][i] == None:
+                        print("NONE")
+                        count += 1
+                        continue
+                    # if solid -> check for visible mesh]
+                    if self.blocks[k][j][i] != air:
+                        isVisible = False
+                        # left face
+                        if i == 0:
+                            isVisible = True
+                        elif self.blocks[k][j][i - 1] == air:
+                            isVisible = True
+
+                        # right face
+                        if i == CONST_WIDTH - 1:
+                            isVisible = True
+                        elif self.blocks[k][j][i + 1] == air:
+                            isVisible = True
+
+                        # top face
+                        if j == 0:
+                            isVisible = True
+                        elif self.blocks[k][j - 1][i] == air:
+                            isVisible = True
+
+                        # bottom face
+                        if j == CONST_HEIGHT - 1:
+                            isVisible = True
+                        elif self.blocks[k][j + 1][i] == air:
+                            isVisible = True
+
+                        # back face
+                        if k == 0:
+                            isVisible = True
+                        elif self.blocks[k - 1][j][i] == air:
+                            isVisible = True
+
+                        # front face
+                        if k == CONST_DEPTH - 1:
+                            isVisible = True
+                        elif self.blocks[k + 1][j][i] == air:
+                            isVisible = True
+
+                        if isVisible:
+                            print("block x", i, "y", j, "z", k)
+                            self.children.append(block(len(self.children), "block", self, transform(vec3(i, j, k)), "DIRT"))
