@@ -4,9 +4,7 @@ import scene
 from objects import *
 from timer import *
 
-from OpenGL.GL import shaders as glShaders
 from OpenGL.GL import *
-from OpenGL.raw.GL.ARB.vertex_array_object import glGenVertexArrays, glBindVertexArray
 from OpenGL.GLU import *
 
 import numpy as np
