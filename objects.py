@@ -3,7 +3,7 @@ from maths3d import *
 
 class script:
 
-    def __init__(self, parent=None):
+    def __init__(self, id=-1, name="script_empty", parent=None):
         self.parent = parent
 
     def start(self):

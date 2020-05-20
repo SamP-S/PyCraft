@@ -2,6 +2,17 @@ import numpy as np
 from enum import IntEnum
 
 
+class RENDER(IntEnum):
+    NONE = 0
+    ARRAYS = 1
+    ARRAYS_INSTANCED = 2
+    ELEMENTS = 3
+    ELEMENTS_INTANCED = 4
+
+
+################################################################################
+# MATERIALS
+
 class MATERIALS(IntEnum):
     NONE = 0
     SOLID_COLOUR = 1
@@ -15,20 +26,50 @@ class material:
         self.name = name
         self.type = type
 
+
 class solid_material(material):
 
     def __init__(self, id=-1, name="solid colour material", type=MATERIALS.SOLID_COLOUR, colour=[0.8, 0.8, 0.8, 1.0]):
         super().__init__(id, name, type)
         self.colour = colour
 
-class mesh:
 
-    def __init__(self, id=-1, name="mesh", vertices=None, indices=None):
+################################################################################
+# MESH
+
+class instances:
+
+    def __init__(self):
+        # store as np arrays for 2 reasons:
+        # 1. its the usable format for vbos
+        # 2. can be used for both non-instanced and instanced rendering
+        self.game_object_ids = np.array([], dtype=np.int32)
+        self.model_projections = np.array([], dtype=np.float32)
+        self.colours = np.array([], dtype=np.float32)
+
+class mesh_data:
+
+    def __init__(self, id=-1, name="mesh_data", vertices=None, indices=None):
         self.id = id
         self.name = name
         self.vertices = vertices
         self.indices = indices
 
+class mesh:
+
+    def __init__(self, id=-1, name="base_mesh", data=-1, mode=RENDER.NONE):
+        self.id = id
+        self.name = name
+        self.data = data
+        self.mode = mode
+        if mode == RENDER.ARRAYS_INSTANCED or mode == RENDER.ELEMENTS_INTANCED:
+            self.instances = instances()
+        else:
+            self.instances = None
+
+
+################################################################################
+## Remove ?
 class model:
 
     def __init__(self, id=-1, name="model", mesh_id=None, material_id=None):
@@ -36,6 +77,7 @@ class model:
         self.name = name
         self.mesh_id = mesh_id
         self.material_id = material_id
+        self.mode = mode
 
 
 ################################################################################

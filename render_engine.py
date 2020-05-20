@@ -168,7 +168,7 @@ class render_engine:
         print("load models")
 
         # cube
-        cubeMesh = models.mesh(0, "cube_mesh", models.cubeVertices, models.cubeIndices)
+        cubeMesh = models.mesh_data(0, "cube_mesh", models.cubeVertices, models.cubeIndices)
         self.meshes.append(cubeMesh)
 
         cubeMaterial = models.solid_material(0, "cube_material")
@@ -178,7 +178,7 @@ class render_engine:
         self.models.append(cubeModel)
 
         # player
-        playerMesh = models.mesh(1, "player_mesh", models.playerVertices, models.playerIndices)
+        playerMesh = models.mesh_data(1, "player_mesh", models.playerVertices, models.playerIndices)
         self.meshes.append(playerMesh)
 
         playerMaterial = models.solid_material(1, "player_material")
@@ -261,6 +261,7 @@ class render_engine:
             self.process_node(child, worldTransform)
 
     def process_node(self, node, origin):
+        t = timer()
         # if game object has a camera component
         if node.camera != None:
             self.cameras.append(node)
