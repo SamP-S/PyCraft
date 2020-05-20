@@ -9,11 +9,6 @@ from cameras import *
 # seed
 # noise type
 
-global mouse
-global keyboard
-mouse = input.mouse()
-keyboard = input.keyboard()
-
 class world:
 
     def __init__(self):
