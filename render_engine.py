@@ -1,6 +1,6 @@
 from maths3d import *
 import models
-import world
+import scene
 from objects import *
 from timer import *
 
@@ -126,13 +126,12 @@ class render_engine:
 
     def __init__(self):
         ("init render engine")
+
+
         self.viewport = viewport()
         self.shader = shader()
         glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
         glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, mat4().m)
-
-        self.transformArr = np.append(m4_translate(0, 0, 0).m, m4_translate(-1, -1, 0).m)
-        self.colourArr = np.append(np.array([1, 1, 1, 1], dtype=np.float32), np.array([1, 0, 0, 1], dtype=np.float32))
 
         # arrays of buffer objects
         self.vaos = []
@@ -212,7 +211,7 @@ class render_engine:
             if True:
                 # vbo for colour
                 glBindBuffer(GL_ARRAY_BUFFER, vbos[1])
-                glBufferData(GL_ARRAY_BUFFER, self.colourArr, GL_STATIC_DRAW)
+                glBufferData(GL_ARRAY_BUFFER, np.array([], dtype=np.float32), GL_STATIC_DRAW)
 
                 # colour instance attribute
                 colourLoc = self.shader.locations[b"colour"]
@@ -224,20 +223,22 @@ class render_engine:
             if True:
                 # vbo for model transformations
                 glBindBuffer(GL_ARRAY_BUFFER, vbos[2])
-                glBufferData(GL_ARRAY_BUFFER, self.transformArr, GL_STATIC_DRAW)
+                glBufferData(GL_ARRAY_BUFFER, np.array([], dtype=np.float32), GL_STATIC_DRAW)
 
                 # model projection instance attribute
                 modelLoc = self.shader.locations[b"model"]
                 glBindBuffer(GL_ARRAY_BUFFER, vbos[2])
 
+                # float32 = 32 bits = 4 bytes
+
                 glEnableVertexAttribArray(modelLoc    )
-                glVertexAttribPointer(modelLoc    , 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(0))
+                glVertexAttribPointer(modelLoc    , 4, GL_FLOAT, GL_FALSE, 4 * 16, ctypes.c_void_p(0))
                 glEnableVertexAttribArray(modelLoc + 1)
-                glVertexAttribPointer(modelLoc + 1, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 4))
+                glVertexAttribPointer(modelLoc + 1, 4, GL_FLOAT, GL_FALSE, 4 * 16, ctypes.c_void_p(4 * 4))
                 glEnableVertexAttribArray(modelLoc + 2)
-                glVertexAttribPointer(modelLoc + 2, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 8))
+                glVertexAttribPointer(modelLoc + 2, 4, GL_FLOAT, GL_FALSE, 4 * 16, ctypes.c_void_p(4 * 8))
                 glEnableVertexAttribArray(modelLoc + 3)
-                glVertexAttribPointer(modelLoc + 3, 4, GL_FLOAT, GL_FALSE, self.transformArr.itemsize * 16, ctypes.c_void_p(self.transformArr.itemsize * 12))
+                glVertexAttribPointer(modelLoc + 3, 4, GL_FLOAT, GL_FALSE, 4 * 16, ctypes.c_void_p(4 * 12))
 
                 glVertexAttribDivisor(modelLoc    , 1);
                 glVertexAttribDivisor(modelLoc + 1, 1);
@@ -251,13 +252,13 @@ class render_engine:
             self.ebos.append(ebo)
 
 
-    def process(self, world):
+    def process(self, parent_node):
         worldPos = vec3(0, 0, 0)
         worldRot = vec3(0, 0, 0)
         worldScl = vec3(1, 1, 1)
         worldTransform = transform(worldPos, worldRot, worldScl)
 
-        for child in world.children:
+        for child in parent_node.children:
             self.process_node(child, worldTransform)
 
     def process_node(self, node, origin):
@@ -288,26 +289,21 @@ class render_engine:
         for child in node.children:
             self.process_node(child, worldTransform)
 
-    def test_render(self):
-        # called once
-        self.shader.use()
-        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, m4_translatev(self.pos).m)
-
-        # iterate through every model's draw list
-        glBindVertexArray(self.vaos[0])
-        glDrawElementsInstanced(GL_TRIANGLES, self.mesh_data[0].indices.size, GL_UNSIGNED_INT, None, 2)
-
     # pass in world tree with all gameobjects ("scene")
-    def render(self, world):
-        t = timer()
+    def render(self, parent_node):
+        # preprocessing
         self.drawlists = [ [np.array([], dtype=np.float32), np.array([], dtype=np.float32)] for i in range(len(self.mesh_data)) ]
-        self.process(world)
+        self.process(parent_node)
 
+        # clear frame buffer
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        # OpenGL settings
+        glEnable(GL_DEPTH_TEST)
         # use shader program
         self.shader.use()
         # perspective projection
         glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
-        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, world.camera.view.m)
+        glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, parent_node.camera.view.m)
 
         for i in range(len(self.mesh_data)):
             #print(self.drawlists[i][0])
@@ -329,6 +325,10 @@ global mouse
 global keyboard
 mouse = input.mouse()
 keyboard = input.keyboard()
+
+global world
+world = scene.world()
+world.children.append(terrain.chunk())
 
 def handleEvents():
     pygame.mouse.set_pos = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
@@ -353,19 +353,14 @@ def main():
     pygame.event.set_grab(True)
     renderer = render_engine()
     frame = 0
-    scene = world.world()
 
-    # OpenGL Settings
-    glEnable(GL_DEPTH_TEST)
+
     t = timer()
     while True:
-        #print("frame")
-
         handleEvents()
-        scene.camera.process(keyboard, mouse)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        world.camera.process(keyboard, mouse)
 
-        renderer.render(scene)
+        renderer.render(world)
 
         pygame.display.flip()
         frame += 1
@@ -373,12 +368,12 @@ def main():
             print("fps: ", frame / t.getTime(False))
 
         if frame == 1000 and True:
-            scene.children[0].change_block(terrain.BLOCK.AIR, 0, 0, 0)
-            scene.children[0].change_block(terrain.BLOCK.STONE, 0, 0, 0)
+            world.children[0].change_block(terrain.BLOCK.AIR, 0, 0, 0)
+            world.children[0].change_block(terrain.BLOCK.STONE, 0, 0, 0)
 
         if frame == 1000 and True:
             print("changed buffer")
-            c = scene.children[0].mesh.instances.colours
+            c = world.children[0].mesh.instances.colours
             c[0] = 0.0
             c[1] = 0.0
             c[2] = 1.0

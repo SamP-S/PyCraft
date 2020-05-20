@@ -16,7 +16,3 @@ class world:
         self.children = []
 
         self.camera = camera()
-
-        #TESTING
-        # add chunk
-        self.children.append(chunk(0))
