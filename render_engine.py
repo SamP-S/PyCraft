@@ -141,7 +141,7 @@ class render_engine:
 
         # store loaded model data
         # seperated meshes and materials for easier individual reuse
-        self.meshes = []
+        self.mesh_data = []
         self.materials = []
 
         # store some preset models
@@ -165,11 +165,11 @@ class render_engine:
     # later: make it read from json to get all models
     # ONLY able when models are on file tho
     def load_models(self):
-        print("load models")
+        print("load model data")
 
         # cube
         cubeMesh = models.mesh_data(0, "cube_mesh", models.cubeVertices, models.cubeIndices)
-        self.meshes.append(cubeMesh)
+        self.mesh_data.append(cubeMesh)
 
         cubeMaterial = models.solid_material(0, "cube_material")
         self.materials.append(cubeMaterial)
@@ -179,7 +179,7 @@ class render_engine:
 
         # player
         playerMesh = models.mesh_data(1, "player_mesh", models.playerVertices, models.playerIndices)
-        self.meshes.append(playerMesh)
+        self.mesh_data.append(playerMesh)
 
         playerMaterial = models.solid_material(1, "player_material")
         self.materials.append(playerMaterial)
@@ -189,7 +189,7 @@ class render_engine:
 
     def setup_models(self):
         print("setup meshes")
-        for i in range(len(self.meshes)):
+        for i in range(len(self.mesh_data)):
             # VAO
             vao = GLuint(-1)
             glGenVertexArrays(1, vao)
@@ -199,11 +199,11 @@ class render_engine:
             # VBO
             vbos = glGenBuffers(3)
             glBindBuffer(GL_ARRAY_BUFFER, vbos[0])
-            glBufferData(GL_ARRAY_BUFFER, self.meshes[i].vertices, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, self.mesh_data[i].vertices, GL_STATIC_DRAW)
             # EBO
             ebo = glGenBuffers(1)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.meshes[i].indices, GL_STATIC_DRAW)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.mesh_data[i].indices, GL_STATIC_DRAW)
 
             # position attribute
             glVertexAttribPointer(self.shader.locations[b"position"], 3, GL_FLOAT, GL_FALSE, 0, None)
@@ -268,15 +268,12 @@ class render_engine:
 
         # if game object has a mesh component
         if node.mesh != None:
-            # iterate through loaded mesh
-            for i in range(len(self.meshes)):
-                # if equal
-                if node.mesh == self.meshes[i].id:
-                    # add an instance to the mesh's draw list
-                    #print("node: ", node.transform.getModel())
-                    self.drawlists[i][0] = np.append(self.drawlists[i][0], node.transform.getModel())
-                    self.drawlists[i][1] = np.append(self.drawlists[i][1], np.array(self.materials[node.material].colour, dtype=np.float32))
-                    break
+            if node.mesh.mode == models.RENDER.ARRAYS or node.mesh.mode == models.RENDER.ELEMENTS:
+                None
+            elif node.mesh.mode == models.RENDER.ARRAYS_INSTANCED or node.mesh.mode == models.RENDER.ELEMENTS_INSTANCED:
+                pos = node.mesh.data
+                self.drawlists[pos][0] = np.append(self.drawlists[pos][0], node.mesh.instances.colours)
+                self.drawlists[pos][1] = np.append(self.drawlists[pos][1], node.mesh.instances.model_projections)
 
         if len(node.children) == 0:
             return
@@ -298,12 +295,12 @@ class render_engine:
 
         # iterate through every model's draw list
         glBindVertexArray(self.vaos[0])
-        glDrawElementsInstanced(GL_TRIANGLES, self.meshes[0].indices.size, GL_UNSIGNED_INT, None, 2)
+        glDrawElementsInstanced(GL_TRIANGLES, self.mesh_data[0].indices.size, GL_UNSIGNED_INT, None, 2)
 
     # pass in world tree with all gameobjects ("scene")
     def render(self, world):
         t = timer()
-        self.drawlists = [ [np.array([], dtype=np.float32), np.array([], dtype=np.float32)] for i in range(len(self.meshes)) ]
+        self.drawlists = [ [np.array([], dtype=np.float32), np.array([], dtype=np.float32)] for i in range(len(self.mesh_data)) ]
         self.process(world)
 
         # use shader program
@@ -312,15 +309,15 @@ class render_engine:
         glUniformMatrix4fv(self.shader.locations[b"proj"], 1, GL_FALSE, self.viewport.projection.m)
         glUniformMatrix4fv(self.shader.locations[b"view"], 1, GL_FALSE, world.camera.view.m)
 
-        for i in range(len(self.meshes)):
+        for i in range(len(self.mesh_data)):
             #print(self.drawlists[i][0])
             glBindVertexArray(self.vaos[i])
             glBindBuffer(GL_ARRAY_BUFFER, self.vbos[i][1])
-            glBufferData(GL_ARRAY_BUFFER, self.drawlists[i][1], GL_STATIC_DRAW)
-            glBindBuffer(GL_ARRAY_BUFFER, self.vbos[i][2])
             glBufferData(GL_ARRAY_BUFFER, self.drawlists[i][0], GL_STATIC_DRAW)
-            instances = round(self.drawlists[i][1].size / 4)
-            glDrawElementsInstanced(GL_TRIANGLES, self.meshes[i].indices.size, GL_UNSIGNED_INT, None, instances)
+            glBindBuffer(GL_ARRAY_BUFFER, self.vbos[i][2])
+            glBufferData(GL_ARRAY_BUFFER, self.drawlists[i][1], GL_STATIC_DRAW)
+            instances = round(self.drawlists[i][0].size / 4)
+            glDrawElementsInstanced(GL_TRIANGLES, self.mesh_data[i].indices.size, GL_UNSIGNED_INT, None, instances)
 
 
 import pygame
@@ -356,7 +353,12 @@ def main():
     renderer = render_engine()
     frame = 0
     scene = world.world()
+
+    # OpenGL Settings
+    glEnable(GL_DEPTH_TEST)
+
     while True:
+        #print("frame")
         handleEvents()
         scene.camera.process(keyboard, mouse)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
@@ -368,13 +370,11 @@ def main():
 
         if frame == 100 and True:
             print("changed buffer")
-            print("r", renderer.drawlists[0][1][0], "g", renderer.drawlists[0][1][1], "b", renderer.drawlists[0][1][2], "a", renderer.drawlists[0][1][3])
-            renderer.drawlists[0][1][0] = 1.0
-            renderer.drawlists[0][1][1] = 0.0
-            renderer.drawlists[0][1][2] = 0.0
-            renderer.drawlists[0][1][3] = 1.0
-            glBindBuffer(GL_ARRAY_BUFFER, renderer.vbos[0][1])
-            glBufferData(GL_ARRAY_BUFFER, renderer.drawlists[0][1], GL_STATIC_DRAW)
+            #print("r", renderer.drawlists[0][1][0], "g", renderer.drawlists[0][1][1], "b", renderer.drawlists[0][1][2], "a", renderer.drawlists[0][1][3])
+            c = scene.children[0].mesh.instances.colours
+            c[0] = 0.0
+            c[1] = 0.0
+            c[2] = 1.0
 
         if frame == 100 and False:
             renderer.colourArr = np.append(np.array([0, 1, 1, 1], dtype=np.float32), np.array([1, 1, 0, 1], dtype=np.float32))

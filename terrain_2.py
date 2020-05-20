@@ -38,6 +38,30 @@ class BLOCK(IntEnum):
 # STATIC BLOCK CONSTANTS
 BLOCK_DIC =  {
 
+            BLOCK.AIR    :  {
+                        "ID"    :   0,
+                        "NAME"  :   "AIR",
+                        "RGB"   :   np.array([1.0, 1.0, 1.0, 0.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.GAS
+            },
+
+            BLOCK.DIRT  :   {
+                        "ID"    :   1,
+                        "NAME"  :   "DIRT",
+                        "RGB"   :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.SOLID
+            },
+
+            BLOCK.STONE  :   {
+                        "ID"    :   2,
+                        "NAME"  :   "STONE",
+                        "RGB"   :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
+                        "STATE" :   ELEMENT_STATE.SOLID
+            }
+
+}
+
+BLOCK_DIC_AGAIN = {
             "AIR"   :   {
                         "ID"    :   0,
                         "RGB"   :   np.array([1.0, 1.0, 1.0, 0.0], dtype='f'),
@@ -100,10 +124,14 @@ class chunk(game_object):
         super().__init__(id, name, parent, transform)
         self.noise = noise
         self.seed = seed
-        self.mesh = mesh()
-        self.mesh
+        self.mesh = models.mesh(id, "chunk_mesh", 0, models.RENDER.ELEMENTS_INSTANCED)
         self.generate()
         self.generate_instances()
+        print("mesh data id: ", self.mesh.data)
+        print("colours: ", self.mesh.instances.colours)
+        print("colours size: ", self.mesh.instances.colours.size)
+        print("transforms: ", self.mesh.instances.model_projections)
+        print("transforms size: ", self.mesh.instances.model_projections.size)
 
 
     def generate(self):
@@ -198,6 +226,8 @@ class chunk(game_object):
 
     # only to be called once upon chunk creation/generation
     def generate_instances(self):
+        air = BLOCK.AIR
+        count = 0
         for k in range(CONST_DEPTH):
             for j in range(CONST_HEIGHT):
                 for i in range(CONST_WIDTH):
@@ -249,16 +279,28 @@ class chunk(game_object):
 
                     # if visible add instance to mesh arrays
                     if isVisible == True:
+                        count += 1
                         pos = k * CONST_WIDTH * CONST_HEIGHT + j * CONST_WIDTH + i
                         colour = BLOCK_DIC[self.blocks[k][j][i]].get("RGB")
-                        transform = self.transform
-                        transform.pos.x += i
-                        transform.pos.y += j
-                        transform.pos.z += k
-                        self.instances.game_object_ids = np.append(self.instances.game_object_ids, pos)
-                        self.instances.colours = np.append(self.instances.colours, colour)
-                        self.instances.model_projections = np.append(self.instances.model_projections, transform.getModel())
+                        print(self.transform.position)
+                        transform = copy.deepcopy(self.transform)
+                        transform.position.x += i
+                        transform.position.y += j
+                        transform.position.z += k
 
+                        self.mesh.instances.game_object_ids = np.append(self.mesh.instances.game_object_ids, pos)
+                        self.mesh.instances.colours = np.append(self.mesh.instances.colours, colour)
+                        self.mesh.instances.model_projections = np.append(self.mesh.instances.model_projections, transform.getModel())
+
+                        if False:
+                            print("game object: ", pos)
+                            print("colour: ", colour)
+                            print("transformation: ", transform.getModel())
+                            print("transform shape: ", transform.getModel().shape)
+                            print("transform shape: ", self.mesh.instances.model_projections.shape)
+                            if count == 1000:
+                                quit()
+        self.mesh.instances.count = count
 
 BASE_CHUNK = chunk()
 

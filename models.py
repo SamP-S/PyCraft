@@ -7,7 +7,7 @@ class RENDER(IntEnum):
     ARRAYS = 1
     ARRAYS_INSTANCED = 2
     ELEMENTS = 3
-    ELEMENTS_INTANCED = 4
+    ELEMENTS_INSTANCED = 4
 
 
 ################################################################################
@@ -44,8 +44,10 @@ class instances:
         # 1. its the usable format for vbos
         # 2. can be used for both non-instanced and instanced rendering
         self.game_object_ids = np.array([], dtype=np.int32)
-        self.model_projections = np.array([], dtype=np.float32)
         self.colours = np.array([], dtype=np.float32)
+        self.model_projections = np.array([], dtype=np.float32)
+        self.count = 0
+        #self.model_projections = np.reshape(self.model_projections, (4, 4))
 
 class mesh_data:
 
@@ -62,7 +64,7 @@ class mesh:
         self.name = name
         self.data = data
         self.mode = mode
-        if mode == RENDER.ARRAYS_INSTANCED or mode == RENDER.ELEMENTS_INTANCED:
+        if mode == RENDER.ARRAYS_INSTANCED or mode == RENDER.ELEMENTS_INSTANCED:
             self.instances = instances()
         else:
             self.instances = None
@@ -77,7 +79,6 @@ class model:
         self.name = name
         self.mesh_id = mesh_id
         self.material_id = material_id
-        self.mode = mode
 
 
 ################################################################################
