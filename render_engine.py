@@ -323,6 +323,7 @@ class render_engine:
 import pygame
 from pygame.locals import *
 import input
+import terrain_2 as terrain
 
 global mouse
 global keyboard
@@ -368,12 +369,15 @@ def main():
 
         pygame.display.flip()
         frame += 1
-        if frame % 60 == 0:
+        if frame % 1000 == 0:
             print("fps: ", frame / t.getTime(False))
 
         if frame == 1000 and True:
+            scene.children[0].change_block(terrain.BLOCK.AIR, 0, 0, 0)
+            scene.children[0].change_block(terrain.BLOCK.STONE, 0, 0, 0)
+
+        if frame == 1000 and True:
             print("changed buffer")
-            #print("r", renderer.drawlists[0][1][0], "g", renderer.drawlists[0][1][1], "b", renderer.drawlists[0][1][2], "a", renderer.drawlists[0][1][3])
             c = scene.children[0].mesh.instances.colours
             c[0] = 0.0
             c[1] = 0.0

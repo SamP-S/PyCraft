@@ -55,7 +55,7 @@ BLOCK_DIC =  {
             BLOCK.STONE  :   {
                         "ID"    :   2,
                         "NAME"  :   "STONE",
-                        "RGB"   :   np.array([0.2, 1.0, 0.2, 1.0], dtype='f'),
+                        "RGB"   :   np.array([0.8, 0.8, 0.8, 1.0], dtype='f'),
                         "STATE" :   ELEMENT_STATE.SOLID
             }
 
@@ -165,10 +165,64 @@ class chunk(game_object):
                         else:
                             self.blocks[k][j][i] = BLOCK.AIR
 
-    def change_block(self, type="AIR", x=-1, y=-1, z=-1):
-        self.logs.append(log(vec3(x, y, z), self.blocks[z][y][x].type, type))
-        self.blocks[z][y][x].type = type
+    def change_block(self, new_type=BLOCK.AIR, x=-1, y=-1, z=-1):
+        # write change log
+        self.logs.append(log(vec3(x, y, z), self.blocks[z][y][x], new_type))
+        # get old block type at position
+        old_type = self.blocks[z][y][x]
+        # calculate index / ID
+        pos = z * CONST_WIDTH * CONST_HEIGHT + y * CONST_WIDTH + x
+        # short hand name
+        instances = self.mesh.instances
 
+        if new_type == BLOCK.AIR:
+            # get first index of 1D-array
+            index = np.where(instances.game_object_ids == pos)[0][0]
+            # position
+            print("pos: ", pos)
+            print("index: ", index)
+            print(instances.game_object_ids)
+            instances.game_object_ids = np.delete(instances.game_object_ids, index)
+            print(instances.game_object_ids)
+            print()
+
+            # colour
+            colour_index = index * 4
+            colour_list = []
+            for i in range(4):
+                colour_list.append(colour_index + i)
+            print("index: ", colour_index)
+            print("list: ", colour_list)
+            print(instances.colours)
+            instances.colours = np.delete(instances.colours, colour_list)
+            print(instances.colours)
+
+            # transformation
+            model_index = index * 16
+            model_list = []
+            for i in range(16):
+                model_list.append(model_index + i)
+            print("index: ", model_index)
+            print("list: ", model_list)
+            print(instances.model_projections)
+            instances.model_projections = np.delete(instances.model_projections, model_list)
+            print(instances.model_projections)
+            # count
+            instances.count -= 1
+
+        elif new_type != BLOCK.AIR and old_type != BLOCK.AIR:
+            print("i didn't know this was possible")
+            print("so i haven't coded it sowwy :(")
+        elif new_type != BLOCK.AIR and old_type == BLOCK.AIR:
+            colour = BLOCK_DIC[new_type].get("RGB")
+            proj = transform(vec3(x, y, z)).getModel()
+
+            instances.game_object_ids = np.append(instances.game_object_ids, pos)
+            instances.colours = np.append(instances.colours, colour)
+            instances.model_projections = np.append(instances.model_projections, proj)
+            instances.count += 1
+
+        self.blocks[z][y][x] = new_type
 
     def generate_children(self):
         air = BLOCK.AIR
@@ -282,7 +336,6 @@ class chunk(game_object):
                         count += 1
                         pos = k * CONST_WIDTH * CONST_HEIGHT + j * CONST_WIDTH + i
                         colour = BLOCK_DIC[self.blocks[k][j][i]].get("RGB")
-                        print(self.transform.position)
                         transform = copy.deepcopy(self.transform)
                         transform.position.x += i
                         transform.position.y += j
