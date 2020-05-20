@@ -356,9 +356,10 @@ def main():
 
     # OpenGL Settings
     glEnable(GL_DEPTH_TEST)
-
+    t = timer()
     while True:
         #print("frame")
+
         handleEvents()
         scene.camera.process(keyboard, mouse)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
@@ -367,23 +368,16 @@ def main():
 
         pygame.display.flip()
         frame += 1
+        if frame % 60 == 0:
+            print("fps: ", frame / t.getTime(False))
 
-        if frame == 100 and True:
+        if frame == 1000 and True:
             print("changed buffer")
             #print("r", renderer.drawlists[0][1][0], "g", renderer.drawlists[0][1][1], "b", renderer.drawlists[0][1][2], "a", renderer.drawlists[0][1][3])
             c = scene.children[0].mesh.instances.colours
             c[0] = 0.0
             c[1] = 0.0
             c[2] = 1.0
-
-        if frame == 100 and False:
-            renderer.colourArr = np.append(np.array([0, 1, 1, 1], dtype=np.float32), np.array([1, 1, 0, 1], dtype=np.float32))
-            renderer.transformArr = np.append(m4_translate(-1, 0, 0).m, m4_translate(0, -1, 0).m)
-            glBindBuffer(GL_ARRAY_BUFFER, renderer.vbos[0][1])
-            glBufferData(GL_ARRAY_BUFFER, renderer.colourArr, GL_STATIC_DRAW)
-            glBindBuffer(GL_ARRAY_BUFFER, renderer.vbos[0][2])
-            glBufferData(GL_ARRAY_BUFFER, renderer.transformArr, GL_STATIC_DRAW)
-            print("buffer data changed")
 
 
 
