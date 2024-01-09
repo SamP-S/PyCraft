@@ -1,6 +1,3 @@
-#%matplotlib inline
-import matplotlib.pyplot as plt
-
 import numpy as np
 from random import random
 
@@ -55,6 +52,11 @@ def getPerlinVal(i, j, seed):
     return img[i][j]
 
 
+"""
+
+#%matplotlib inline
+import matplotlib.pyplot as plt
+
 def main():
     n = 16
     range = 8
@@ -68,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
