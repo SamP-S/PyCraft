@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import numpy as np
 
 playerVertices = np.array([ 0.0, 0.0, 0.0,   0.0, 0.0, 1.0,
@@ -24,3 +25,17 @@ class person(alive):
     def __init__(self, pos, camera):
         super().__init__(pos)
         self.camera = camera
+=======
+from camera import *
+
+class alive:
+
+    def __init__(self, pos):
+         self.pos = pos
+
+class player(alive):
+
+    def __init__(self, pos, camera):
+        super().__init__(pos)
+        self.camera = camera()
+>>>>>>> 1cf19361f5e172955bd752744e6c7c8b6d39a767
